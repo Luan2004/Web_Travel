@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tour Việt Nam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="header.js" defer></script>
+    <script src="footer.js" defer></script>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-blue-600 text-white py-4 px-6 flex justify-between items-center">
+        <a href="home.html">
+            <img src="https://img.lovepik.com/png/20231001/travel-logo-design-free-logo-design-template-navigation-tourism_46437_wh860.png" alt="Travel Logo" class="h-16">
+        </a>
+        <nav>
+            <ul class="flex space-x-6">
+                <li><a href="#" class="hover:underline">Trang chủ</a></li>
+                <li><a href="#tour-list" class="hover:underline">Tours</a></li>
+                <li><a href="#" class="hover:underline">Liên hệ</a></li>
+            </ul>
+        </nav>
+        <button onclick="window.location.href='login.html'" class="bg-white text-blue-600 px-4 py-2 rounded-lg border border-blue-600 w-full sm:w-auto hover:bg-blue-600 hover:text-white transition">
+            Đăng nhập
+        </button>
+    </header>
+
+    <!-- Search -->
+    <section class="relative w-full h-96 bg-cover bg-center" style="background-image: url('https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2022/7/13/1067753/Tu-Hao-Vinh-Ha-Long-.jpg');">
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white">
+            <h2 class="text-4xl font-bold mb-4">Khám phá Việt Nam tuyệt vời</h2>
+            <div class="relative">
+                <input id="searchInput" type="text" placeholder="Tìm kiếm tour..." class="px-4 py-2 w-80 text-black rounded-lg">
+                <ul id="suggestions" class="absolute w-full bg-white text-black rounded-lg shadow-md hidden"></ul>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const search = document.getElementById("searchInput");
+
+        searchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                const query = search.value.trim();
+                if (query) {
+                    window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+    </script>
+
+    <!-- Danh sách gợi ý -->
+    <script>
+        const searchInput = document.getElementById("searchInput");
+        const suggestionBox = document.getElementById("suggestions");
+
+        function fetchSuggestions() {
+            fetch("http://localhost:5000/tours") // This URL should be updated according to your API's endpoint
+                .then(response => response.json())
+                .then(data => {
+                    const suggestions = data.map(tour => tour.name); // Assuming 'name' is the field for the tour names
+                    searchInput.addEventListener("input", function() {
+                        const inputVal = this.value.toLowerCase();
+                        suggestionBox.innerHTML = "";
+                        suggestionBox.classList.add("hidden");
+
+                        if (inputVal) {
+                            const filteredSuggestions = suggestions.filter(suggestion =>
+                                suggestion.toLowerCase().includes(inputVal)
+                            );
+
+                            if (filteredSuggestions.length > 0) {
+                                suggestionBox.classList.remove("hidden");
+                                filteredSuggestions.forEach(suggestion => {
+                                    const li = document.createElement("li");
+                                    li.textContent = suggestion;
+                                    li.classList.add("px-4", "py-2", "cursor-pointer", "hover:bg-gray-200");
+
+                                    li.addEventListener("click", function() {
+                                        searchInput.value = suggestion;
+                                        suggestionBox.classList.add("hidden");
+                                        // Navigate to the search page with the query as URL parameter
+                                        window.location.href = `search.html?q=${encodeURIComponent(suggestion)}`;
+                                    });
+
+                                    suggestionBox.appendChild(li);
+                                });
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Lỗi khi tải danh sách tour:", error);
+                });
+        }
+
+        // Fetch suggestions when the page loads
+        fetchSuggestions();
+
+        // Ẩn gợi ý khi click ra ngoài
+        document.addEventListener("click", function(e) {
+            if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
+                suggestionBox.classList.add("hidden");
+            }
+        });
+    </script>
+
+    <!-- Danh sách tours -->
+    <section class="py-10 px-6">
+        <h2 class="text-3xl font-bold text-center mb-6">Tour nổi bật</h2>
+        <div id="tour-list" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+    </section>
+
+    <!-- Click vào tour -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch("http://localhost:5000/tours")
+                .then(response => response.json())
+                .then(data => {
+                    const tourContainer = document.getElementById("tour-list");
+                    tourContainer.innerHTML = "";
+
+                    data.forEach(tour => {
+                        const tourItem = document.createElement("div");
+                        tourItem.classList.add(
+                            "bg-white", "p-4", "rounded-lg", "shadow-md",
+                            "transform", "transition", "duration-300",
+                            "hover:scale-105", "hover:shadow-2xl"
+                        );
+
+                        // Tính toán và hiển thị giảm giá (discount)
+                        let discountText = "";
+                        if (tour.old_price && tour.old_price > tour.price) {
+                            const discount = Math.round(100 * (tour.old_price - tour.price) / tour.old_price);
+                            discountText = `<span class="price-save bold text-red-600 border-2 border-red-600 px-2 py-1 rounded-md">-${discount}%</span>`;
+                        }
+
+                        tourItem.innerHTML = `
+                            <img src="${tour.image}" alt="${tour.name}" class="w-full h-48 object-cover rounded-lg cursor-pointer">
+                            <h3 class="text-xl font-bold mt-4 cursor-pointer">${tour.name}</h3>
+                            <p class="text-gray-600">Thời gian: ${tour.duration}</p>
+                            <p class="text-gray-600 line-through text-sm">${tour.old_price ? tour.old_price.toLocaleString() + 'đ' : ''}</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-gray-700 font-bold text-red-600 text-xl">${tour.price.toLocaleString()}đ</p>
+                                ${discountText} <!-- Hiển thị discount với đường viền -->
+                            </div>
+                            <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Đặt ngay</button>
+                        `;
+
+                        // Chuyển đến trang chi tiết khi click
+                        tourItem.addEventListener("click", () => {
+                            window.location.href = `detail.html?id=${tour.id}`;
+                        });
+
+                        tourContainer.appendChild(tourItem);
+                    });
+                })
+                .catch(error => console.error("Lỗi khi tải danh sách tour:", error));
+        });
+    </script>
+
+
+    <!-- Footer -->
+    <footer class="footer lazyload_bg loaded" data-src="//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107" style="background-image: url(&quot;//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107&quot;);">
+        <div class="container px-6" bis_skin_checked="1">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="col-12 col-md-6 col-lg-3 col-footer col-info" bis_skin_checked="1">
+                    <h4 class="text-xl font-bold mt-4">THÔNG TIN LIÊN HỆ</h4>
+                    <div class="hidden-mobile" bis_skin_checked="1">
+                        <span class="d-block mb-1">Tên công ty</span>
+                        <p>CÔNG TY CỔ PHẦN DU LỊCH CHÀO NGÀY MỚI</p>
+                        <span class="d-block mb-1">Địa chỉ</span>
+                        <p>Tổ 2 Trường Sơn, Phường Vĩnh Trường, Thành phố Nha Trang, Tỉnh Khánh Hòa, Việt Nam<br>
+                            <a href="tel:0902288296" class="d-block" title="0902288296">Hỗ trợ: 0902288296</a>
+                        </p>
+                        <span class="d-block mb-1">Giấy phép kinh doanh lữ hành số:</span>
+                        <p>56-303/2024/TCDL-GP LHQT</p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 col-footer col-info">
+                    <h4 class="text-xl font-bold mt-4">CHĂM SÓC KHÁCH HÀNG</h4>
+                    <div class="hidden-mobile" bis_skin_checked="1">
+                        <span class="d-block mb-1">Thời gian hỗ trợ</span>
+                        <p>8H - 22H Hàng ngày</p>
+                        <span class="d-block mb-1">Hotline</span>
+                        <p><a href="tel:02586505986" title="0258 650 5986">0258 650 5986</a></p>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 col-lg-3 col-footer col-menu">
+                    <h4 class="text-xl font-bold mt-4">CHÍNH SÁCH</h4>
+                    <ul class="list-menu hidden-mobile list-unstyled">
+                        <li><a href="/phuong-thuc-thanh-toan" title="Phương thức thanh toán" class="d-block py-2">Phương thức thanh toán</a></li>
+                        <li><a href="/chinh-sach-bao-mat-thong-tin" title="Chính sách bảo mật thông tin" class="d-block py-2">Chính sách bảo mật thông tin</a></li>
+                        <li><a href="/huong-dan-dat-tour" title="Hướng dẫn đặt tour" class="d-block py-2">Hướng dẫn đặt tour</a></li>
+                        <li><a href="/chinh-sach-thay-doi-va-hoan-huy" title="Chính sách thay đổi và hoàn hủy" class="d-block py-2">Chính sách thay đổi và hoàn hủy</a></li>
+                        <li><a href="https://goodmorningtravel.vn/gioi-thieu" title="Giới thiệu về Goodmorning Travel" class="d-block py-2">Giới thiệu về Goodmorning Travel</a></li>
+                        <li><a href="https://goodmorningtravel.vn/apps/affiliate-v2" title="Đăng ký đối tác Affiliate" class="d-block py-2">Đăng ký đối tác Affiliate</a></li>
+                        <li><a href="/dieu-khoan-va-dieu-kien" title="Điều khoản và điều kiện" class="d-block py-2">Điều khoản và điều kiện</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright d-md-flex align-items-center py-3" bis_skin_checked="1">
+                © Bản quyền thuộc về CÔNG TY CỔ PHẦN DU LỊCH CHÀO NGÀY MỚI
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

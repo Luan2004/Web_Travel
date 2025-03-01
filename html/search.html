@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả tìm kiếm</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/header.js" defer></script>
+    <script src="/js/footer.js" defer></script>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Gọi header -->
+    <my-header></my-header>
+    <!-- Khung Search -->
+    <!-- Ô tìm kiếm trên search.html -->
+    <section class="relative w-full bg-cover bg-center mt-16">
+        <div class="absolute inset-0 flex flex-col justify-center items-center text-white">
+            <div class="relative w-full max-w-lg">
+                <input id="searchInput" type="text" placeholder="Tìm kiếm tour..." class="px-4 py-2 w-full text-black rounded-lg pl-10">
+                <ul id="suggestions" class="absolute w-full bg-white text-black rounded-lg shadow-md hidden"></ul>
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14zm7 7h.01M21 21l-6-6"></path>
+            </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- Kết quả tìm kiếm -->
+    <section class="py-10 px-6 w-full">
+        <h2 class="text-3xl font-bold text-center mb-6">Có <span id="result-count">0</span> kết quả tìm kiếm phù hợp</h2>
+        <div id="tour-list" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("searchInput");
+
+            // Xử lý sự kiện khi người dùng nhập liệu vào ô tìm kiếm
+            searchInput.addEventListener("input", function() {
+                const query = searchInput.value.trim();
+                if (query) {
+                    // Lọc kết quả ngay lập tức khi có sự thay đổi trong ô tìm kiếm
+                    fetch(`http://localhost:5000/tours`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const filteredTours = data.filter(tour =>
+                                tour.name.toLowerCase().includes(query.toLowerCase())
+                            );
+                            document.getElementById("result-count").textContent = filteredTours.length;
+
+                            const tourContainer = document.getElementById("tour-list");
+                            tourContainer.innerHTML = "";
+
+                            filteredTours.forEach(tour => {
+                                const tourItem = document.createElement("div");
+                                tourItem.classList.add(
+                                    "bg-white", "p-4", "rounded-lg", "shadow-md",
+                                    "transform", "transition", "duration-300",
+                                    "hover:scale-105", "hover:shadow-2xl"
+                                );
+
+                                let discountText = "";
+                                if (tour.old_price && tour.old_price > tour.price) {
+                                    const discount = Math.round(100 * (tour.old_price - tour.price) / tour.old_price);
+                                    discountText = `<span class="price-save bold text-red-600 border-2 border-red-600 px-2 py-1 rounded-md">-${discount}%</span>`;
+                                }
+
+                                tourItem.innerHTML = `
+                                    <img src="${tour.image}" alt="${tour.name}" class="w-full h-48 object-cover rounded-lg cursor-pointer">
+                                    <h3 class="text-xl font-bold mt-4 cursor-pointer">${tour.name}</h3>
+                                    <p class="text-gray-600">Thời gian: ${tour.duration}</p>
+                                    <p class="text-gray-600 line-through text-sm">${tour.old_price ? tour.old_price.toLocaleString() + 'đ' : ''}</p>
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-gray-700 font-bold text-red-600 text-xl">${tour.price.toLocaleString()}đ</p>
+                                    </div>
+                                    <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Đặt ngay</button>
+                                `;
+
+                                tourItem.addEventListener("click", () => {
+                                    window.location.href = `detail.html?id=${tour.id}`;
+                                });
+
+                                tourContainer.appendChild(tourItem);
+                            });
+                        })
+                        .catch(error => console.error("Lỗi khi tải danh sách tour:", error));
+                }
+            });
+        });
+    </script>
+
+    <!-- Gọi footer -->
+    <my-footer></my-footer>
+</body>
+
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/header.js" defer></script>
+    <script src="/js/footer.js" defer></script>
+</head>
+
+<body>
+    <!-- Gọi header -->
+    <my-header></my-header>
+
+    <main class="container mx-auto p-5">
+        <div class="bg-white shadow-lg rounded-lg p-5 max-w-md mx-auto">
+            <h2 class="text-xl font-semibold mb-4">Đăng Ký</h2>
+            <form id="registerForm">
+                <label class="block mb-2">Tên đăng nhập</label>
+                <input type="text" id="username" class="w-full p-2 border rounded mb-4" placeholder="Nhập tên đăng nhập" required>
+
+                <label class="block mb-2">Email</label>
+                <input type="email" id="email" class="w-full p-2 border rounded mb-4" placeholder="Nhập email" required>
+
+                <label class="block mb-2">Mật Khẩu</label>
+                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Nhập mật khẩu" required>
+
+                <label class="block mb-2">Xác Nhận Mật Khẩu</label>
+                <input type="password" id="confirm-password" class="w-full p-2 border rounded mb-4" placeholder="Nhập lại mật khẩu" required>
+
+                <button type="submit">Đăng Ký</button>
+            </form>
+        </div>
+    </main>
+
+    <p id="message"></p>
+
+    <script>
+        async function registerUser(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const messageElement = document.getElementById('message');
+
+            if (password !== confirmPassword) {
+                messageElement.textContent = 'Mật khẩu không khớp!';
+                messageElement.style.color = 'red';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageElement.textContent = 'Đăng ký thành công!';
+                    messageElement.style.color = 'green';
+                    setTimeout(() => {
+                        window.location.href = 'watch.html'; // Điều hướng sau khi đăng nhập thành công
+                    }, 10);
+                } else {
+                    messageElement.textContent = `Đăng ký thất bại: ${data.message || 'Lỗi không xác định'}`;
+                    messageElement.style.color = 'red';
+                }
+            } catch (error) {
+                messageElement.textContent = 'Đăng ký thất bại. Vui lòng thử lại.';
+                messageElement.style.color = 'red';
+            }
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', registerUser);
+    </script>
+    <!-- Gọi footer -->
+    <my-footer></my-footer>
+</body>
+
+</html>
