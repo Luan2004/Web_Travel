@@ -2,7 +2,7 @@ class MyHeader extends HTMLElement {
     connectedCallback() {
         const isHomePage = window.location.pathname.includes("home.html") || window.location.pathname === "/";
 
-        this.innerHTML = `
+        this.innerHTML = 
             <header id="main-header" class="top-0 left-0 w-full h-14 px-6 flex justify-between items-center transition-all duration-300 z-50
                 ${isHomePage ? 'absolute text-white bg-transparent' : 'fixed bg-white text-black shadow-md'}">
                 <a href="home.html">
