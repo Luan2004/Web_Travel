@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNPay QR Payment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="max-w-4xl mx-auto bg-white p-6 mt-10 rounded-lg shadow-md flex flex-col md:flex-row justify-between">
+        <!-- Thông tin đơn hàng -->
+        <div class="w-full md:w-1/2 p-6 space-y-4">
+            <h2 class="text-xl font-semibold mb-4 space-y-4">Thông tin đơn hàng</h2>
+            <p class="text-gray-700">Số tiền thanh toán: <span id="total-amount" class="text-blue-600 font-bold text-xl"></span> VND</p>
+            <p class="text-gray-700">Giá trị đơn hàng: <span id="order-value" class="text-blue-600 font-bold"></span> VND</p>
+            <p class="text-gray-700">Phí giao dịch: <span class="text-blue-600 font-bold">15586974</span> VND</p>
+            <p class="text-gray-700">Mã đơn hàng: <span id="order-id" class="font-semibold"></span></p>
+            <p class="text-gray-700">Nhà cung cấp: <span class="font-semibold">CÔNG TY CỔ PHẦN DU LỊCH CHÀO NGÀY MỚI</span></p>
+        </div>
+
+        <!-- QR Code -->
+        <div class="w-full md:w-1/2 flex flex-col items-center">
+            <h3 class="text-lg font-semibold mb-2">Quét mã qua ứng dụng Ngân hàng/ Ví điện tử</h3>
+            <a href="#" class="text-blue-600 text-sm mb-2">&#9432; Hướng dẫn thanh toán</a>
+            <img src="img/qr.png" alt="VNPay QR Code" class="h-48 w-48 border p-2">
+            <p class="text-gray-600 mt-2">Scan to Pay</p>
+
+            <!-- Button Hủy Thanh Toán -->
+            <button onclick="openCancelModal()" class="bg-red-600 text-white py-2 px-6 rounded-lg hover:bg-red-700 mt-4">
+                Hủy thanh toán
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Xác nhận Hủy -->
+    <div id="cancelModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 class="text-xl font-bold mb-4">Hủy thanh toán</h2>
+            <p class="text-gray-700">Quý khách có chắc chắn muốn hủy thanh toán giao dịch này?</p>
+            <div class="flex justify-end mt-4 space-x-2">
+                <button onclick="closeCancelModal()" class="px-4 py-2 bg-gray-300 rounded-lg">Đóng</button>
+                <button onclick="confirmCancel()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Xác nhận hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic nút Hủy thanh toán -->
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            const totalAmount = params.get("amount") || "0";
+            const orderId = params.get("order") || "N/A";
+            const tourId = params.get("id") || "";
+            const date = params.get("date") || "";
+            const adults = params.get("adults") || "1";
+            const children = params.get("children") || "0";
+        
+            document.getElementById("total-amount").textContent = Number(totalAmount).toLocaleString();
+            document.getElementById("order-value").textContent = Number(totalAmount).toLocaleString();
+            document.getElementById("order-id").textContent = orderId;
+        
+            // Kiểm tra nếu `tourId` có giá trị thì mới lưu vào `localStorage`
+            if (tourId) {
+                localStorage.setItem("lastTourId", tourId);
+                localStorage.setItem("lastDate", date);
+                localStorage.setItem("lastAdults", adults);
+                localStorage.setItem("lastChildren", children);
+            }
+        });
+        
+
+        function openCancelModal() {
+            document.getElementById("cancelModal").classList.remove("hidden");
+        }
+
+        function closeCancelModal() {
+            document.getElementById("cancelModal").classList.add("hidden");
+        }
+
+        function confirmCancel() {
+            // Lấy thông tin tour từ localStorage
+            const tourId = localStorage.getItem("lastTourId") || "";
+            const date = localStorage.getItem("lastDate") || "";
+            const adults = localStorage.getItem("lastAdults") || "1"; // Mặc định 1 người lớn
+            const children = localStorage.getItem("lastChildren") || "0"; // Mặc định không có trẻ em
+        
+            if (!tourId) {
+                alert("Lỗi: Không tìm thấy thông tin tour! Vui lòng chọn lại.");
+                window.location.href = "home.html"; // Chuyển về trang chủ nếu không có tourId
+                return;
+            }
+        
+            // Chuyển hướng về tour.html với thông tin đầy đủ
+            window.location.href = `tour.html?id=${tourId}&date=${encodeURIComponent(date)}&adults=${adults}&children=${children}`;
+        }
+        
+    </script>
+
+    <!---->
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            document.getElementById("total-amount").textContent = params.get("amount") || "0";
+            document.getElementById("order-id").textContent = params.get("order") || "N/A";
+        });
+    </script>
+</body>
+</html>

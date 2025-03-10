@@ -21,11 +21,36 @@
                 <input id="searchInput" type="text" placeholder="Tìm kiếm tour..." class="px-4 py-2 w-full text-black rounded-lg pl-10">
                 <ul id="suggestions" class="absolute w-full bg-white text-black rounded-lg shadow-md hidden"></ul>
                 <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14zm7 7h.01M21 21l-6-6"></path>
-            </svg>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14zm7 7h.01M21 21l-6-6"></path>
+                </svg>
+                <!-- Biểu tượng micro -->
+                <button id="voiceSearch" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm6-3v1a6 6 0 01-12 0v-1m12 0a6 6 0 01-12 0m12 0V9m-12 0v2"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </section>
+
+    <!-- Tìm kiếm bằng giọng nói -->
+    <script>
+        document.getElementById('voiceSearch').addEventListener('click', function() {
+            const recognition = new(window.SpeechRecognition || window.webkitSpeechRecognition)();
+
+            recognition.lang = 'vi-VN'; // Vietnamese Language
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('searchInput').value = transcript;
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Lỗi nhận diện giọng nói:', event.error);
+            };
+        });
+    </script>
 
     <!-- Kết quả tìm kiếm -->
     <section class="py-10 px-6 w-full">
@@ -36,58 +61,71 @@
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const searchInput = document.getElementById("searchInput");
+            const tourContainer = document.getElementById("tour-list");
+            const resultCount = document.getElementById("result-count");
 
-            // Xử lý sự kiện khi người dùng nhập liệu vào ô tìm kiếm
+            // Lấy từ khóa từ URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get("q");
+
+            if (query) {
+                searchInput.value = query; // Hiển thị từ khóa trong ô tìm kiếm
+                fetchSearchResults(query); // Tìm kiếm kết quả ngay lập tức
+            }
+
+            // Lắng nghe sự kiện nhập liệu
             searchInput.addEventListener("input", function() {
-                const query = searchInput.value.trim();
-                if (query) {
-                    // Lọc kết quả ngay lập tức khi có sự thay đổi trong ô tìm kiếm
-                    fetch(`http://localhost:5000/tours`)
-                        .then(response => response.json())
-                        .then(data => {
-                            const filteredTours = data.filter(tour =>
-                                tour.name.toLowerCase().includes(query.toLowerCase())
-                            );
-                            document.getElementById("result-count").textContent = filteredTours.length;
-
-                            const tourContainer = document.getElementById("tour-list");
-                            tourContainer.innerHTML = "";
-
-                            filteredTours.forEach(tour => {
-                                const tourItem = document.createElement("div");
-                                tourItem.classList.add(
-                                    "bg-white", "p-4", "rounded-lg", "shadow-md",
-                                    "transform", "transition", "duration-300",
-                                    "hover:scale-105", "hover:shadow-2xl"
-                                );
-
-                                let discountText = "";
-                                if (tour.old_price && tour.old_price > tour.price) {
-                                    const discount = Math.round(100 * (tour.old_price - tour.price) / tour.old_price);
-                                    discountText = `<span class="price-save bold text-red-600 border-2 border-red-600 px-2 py-1 rounded-md">-${discount}%</span>`;
-                                }
-
-                                tourItem.innerHTML = `
-                                    <img src="${tour.image}" alt="${tour.name}" class="w-full h-48 object-cover rounded-lg cursor-pointer">
-                                    <h3 class="text-xl font-bold mt-4 cursor-pointer">${tour.name}</h3>
-                                    <p class="text-gray-600">Thời gian: ${tour.duration}</p>
-                                    <p class="text-gray-600 line-through text-sm">${tour.old_price ? tour.old_price.toLocaleString() + 'đ' : ''}</p>
-                                    <div class="flex items-center justify-between">
-                                        <p class="text-gray-700 font-bold text-red-600 text-xl">${tour.price.toLocaleString()}đ</p>
-                                    </div>
-                                    <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Đặt ngay</button>
-                                `;
-
-                                tourItem.addEventListener("click", () => {
-                                    window.location.href = `detail.html?id=${tour.id}`;
-                                });
-
-                                tourContainer.appendChild(tourItem);
-                            });
-                        })
-                        .catch(error => console.error("Lỗi khi tải danh sách tour:", error));
+                const newQuery = searchInput.value.trim();
+                if (newQuery) {
+                    fetchSearchResults(newQuery);
                 }
             });
+
+            function fetchSearchResults(searchQuery) {
+                fetch(`http://localhost:5000/tours`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const filteredTours = data.filter(tour =>
+                            tour.name.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+
+                        resultCount.textContent = filteredTours.length; // Cập nhật số lượng kết quả
+                        tourContainer.innerHTML = ""; // Xóa kết quả cũ
+
+                        filteredTours.forEach(tour => {
+                            const tourItem = document.createElement("div");
+                            tourItem.classList.add(
+                                "bg-white", "p-4", "rounded-lg", "shadow-md",
+                                "transform", "transition", "duration-300",
+                                "hover:scale-105", "hover:shadow-2xl"
+                            );
+
+                            let discountText = "";
+                            if (tour.old_price && tour.old_price > tour.price) {
+                                const discount = Math.round(100 * (tour.old_price - tour.price) / tour.old_price);
+                                discountText = `<span class="price-save bold text-red-600 border-2 border-red-600 px-2 py-1 rounded-md">-${discount}%</span>`;
+                            }
+
+                            tourItem.innerHTML = `
+                                <img src="${tour.image}" alt="${tour.name}" class="w-full h-48 object-cover rounded-lg cursor-pointer">
+                                <h3 class="text-xl font-bold mt-4 cursor-pointer">${tour.name}</h3>
+                                <p class="text-gray-600">Thời gian: ${tour.duration}</p>
+                                <p class="text-gray-600 line-through text-sm">${tour.old_price ? tour.old_price.toLocaleString() + 'đ' : ''}</p>
+                                <div class="flex items-center justify-between">
+                                    <p class="text-gray-700 font-bold text-red-600 text-xl">${tour.price.toLocaleString()}đ</p>
+                                </div>
+                                <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Đặt ngay</button>
+                            `;
+
+                            tourItem.addEventListener("click", () => {
+                                window.location.href = `tour.html?id=${tour.id}`;
+                            });
+
+                            tourContainer.appendChild(tourItem);
+                        });
+                    })
+                    .catch(error => console.error("Lỗi khi tải danh sách tour:", error));
+            }
         });
     </script>
 

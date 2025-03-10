@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt Tour - GoodMorning Travel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .dropdown-container {
+            position: relative;
+        }
+    
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+        
+        .dropdown.show {
+            display: block;
+        }
+        
+        .arrow {
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .arrow.rotate {
+            transform: rotate(180deg);
+        }
+        
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        ul li {
+            padding: 8px;
+            cursor: pointer;
+        }
+        
+        ul li:hover {
+            background: #f1f1f13c;
+        }
+        /* Tạo đường kẻ ngăn cách giữa 2 phần */
+        
+        .separator {
+            border-left: 2px solid #dddddd5b;
+        }
+        
+        .ke {
+            border-bottom: 2px solid #dddddd5b;
+        }
+        /* Đảm bảo input và button nằm ngang và cùng chiều cao*/
+        
+        .flex {
+            display: flex;
+            align-items: center;
+            height: 40px;
+        }
+        /* Đảm bảo input và button nằm ngang đúng */
+        
+        .container {
+            max-width: 80vw;
+            /* Mở rộng form rộng 80% màn hình */
+            margin: 0 auto;
+        }
+        
+        .form-container {
+            width: 100%;
+            padding: 2rem;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dropdown-container {
+            position: relative;
+            width: 100%;
+        }
+        
+        .button-primary {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1rem;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .button-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .input-error {
+            border: 1px solid red !important;
+        }
+        /* Định dạng khi có lỗi */
+        
+        .input-error {
+            border: 1px solid red !important;
+        }
+        
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="text-center py-3 bg-gray-200">
+        <a href="home.html" class="text-blue-600">Trang chủ</a> >
+        <a id="back-to-tour" class="text-blue-600">Đặt tour</a>
+    </nav>
+
+    <!-- Quay lại tour -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            const tourId = params.get("id");
+            const date = params.get("date");
+            const adults = params.get("adults");
+            const children = params.get("children");
+
+            const backToTour = document.getElementById("back-to-tour");
+            if (tourId) {
+                backToTour.href = `tour.html?id=${tourId}&date=${encodeURIComponent(date)}&adults=${adults}&children=${children}`;
+            } else {
+                backToTour.href = "tour.html"; // Phòng trường hợp không có ID
+            }
+        });
+    </script>
+
+
+    <main class="max-w-5xl mx-auto mt-6 grid md:grid-cols-2 gap-6">
+        <!-- Form thông tin khách du lịch -->
+        <section class="w-full max-w-none p-6 mx-auto">
+            <h2 class="text-lg font-semibold mb-4">Thông tin khách du lịch</h2>
+            <form id="booking-form" class="space-y-4">
+                <input type="email" id="email" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Email" required>
+
+                <input type="text" id="username" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Họ và tên" required>
+
+                <input type="tel" id="phone" placeholder="Số điện thoại" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="dropdown-container">
+                        <div class="relative" onclick="toggleDropdown('province')">
+                            <input type="text" id="province-input" class="w-full p-2 border cursor-pointer rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Chọn tỉnh/thành" readonly>
+                            <span class="absolute right-3 top-3 arrow">▼</span>
+                        </div>
+                        <div id="province-dropdown" class="dropdown">
+                            <ul id="province-list" class="p-2"></ul>
+                        </div>
+                    </div>
+                    <div class="dropdown-container">
+                        <div class="relative" onclick="toggleDropdown('district')">
+                            <input type="text" id="district-input" class="w-full p-2 border cursor-pointer rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Chọn quận/huyện" readonly>
+                            <span class="absolute right-3 top-3 arrow">▼</span>
+                        </div>
+                        <div id="district-dropdown" class="dropdown">
+                            <ul id="district-list" class="p-2"></ul>
+                        </div>
+                    </div>
+                    <div class="dropdown-container">
+                        <div class="relative" onclick="toggleDropdown('ward')">
+                            <input type="text" id="ward-input" class="w-full p-2 border cursor-pointer rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Chọn phường/xã" readonly>
+                            <span class="absolute right-3 top-3 arrow">▼</span>
+                        </div>
+                        <div id="ward-dropdown" class="dropdown">
+                            <ul id="ward-list" class="p-2"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="text" id="hotel-address" placeholder="Địa chỉ đón - Tên khách sạn" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+
+                <button type="button" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                    Tiếp tục chọn phương thức thanh toán
+                </button>
+            </form>
+        </section>
+        
+        <!-- Logic nút Tieeos tục thanh toán -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const bookingForm = document.getElementById("booking-form");
+                const continueButton = bookingForm.querySelector("button");
+            
+                continueButton.addEventListener("click", function(event) {
+                    event.preventDefault(); // Ngăn chặn chuyển trang ngay lập tức
+            
+                    let isValid = true;
+                    const totalPrice = document.getElementById("total-price").textContent.replace("₫", "").replace(/\./g, '').trim();
+            
+                    const requiredFields = [
+                        { id: "email", name: "Email", type: "email" },
+                        { id: "username", name: "Họ và tên", type: "text" },
+                        { id: "phone", name: "Số điện thoại", type: "phone" },
+                        { id: "province-input", name: "Tỉnh/Thành phố", type: "text" },
+                        { id: "district-input", name: "Quận/Huyện", type: "text" },
+                        { id: "ward-input", name: "Phường/Xã", type: "text" },
+                        { id: "hotel-address", name: "Địa chỉ khách sạn", type: "text" }
+                    ];
+            
+                    requiredFields.forEach(field => {
+                        const inputElement = document.getElementById(field.id);
+                        let errorElement = inputElement.nextElementSibling;
+            
+                        if (!errorElement || !errorElement.classList.contains("error-message")) {
+                            errorElement = document.createElement("p");
+                            errorElement.className = "error-message text-red-500 text-sm mt-1";
+                            inputElement.insertAdjacentElement("afterend", errorElement);
+                        }
+            
+                        // Kiểm tra nếu input trống
+                        if (!inputElement.value.trim()) {
+                            inputElement.classList.add("input-error");
+                            errorElement.textContent = `${field.name} không được để trống`;
+                            isValid = false;
+                        } else {
+                            inputElement.classList.remove("input-error");
+                            errorElement.textContent = "";
+                        }
+            
+                        // Kiểm tra số điện thoại
+                        if (field.type === "phone") {
+                            const phoneRegex = /^\d{10}$/;
+                            if (!phoneRegex.test(inputElement.value.trim())) {
+                                inputElement.classList.add("input-error");
+                                errorElement.textContent = "Số điện thoại phải có đúng 10 chữ số";
+                                isValid = false;
+                            }
+                        }
+                    });
+            
+                    // Nếu form hợp lệ, chuyển sang trang thanh toán với tổng tiền chính xác
+                    if (isValid) {
+                        const params = new URLSearchParams(window.location.search);
+                        const tourId = params.get("id");
+                        const date = params.get("date");
+                        const adults = params.get("adults");
+                        const children = params.get("children");
+            
+                        window.location.href = `pay.html?amount=${totalPrice}&id=${tourId}&date=${date}&adults=${adults}&children=${children}`;
+                    }
+                });
+            });
+        </script>
+
+        <!-- Form bên phải: Đơn hàng -->
+        <section class="p-6 separator">
+            <h2 class="text-lg font-semibold mb-4">Đặt chỗ</h2>
+            <div class="flex items-center space-x-4">
+                <img id="tour-image" alt="Tour Image" class="w-16 h-16 rounded">
+                <div>
+                    <p id="tour-name" class="font-semibold"></p>
+                    <p class="text-sm text-gray-600">Người lớn: <span id="adult-count-display"></span></p>
+                    <p class="text-sm text-gray-600">Trẻ em: <span id="child-count-display"></span></p>
+                    <p class="text-sm text-gray-600">Ngày đi: <span id="tour-date"></span></p>
+                </div>
+            </div>
+
+            <div class="mt-4 flex items-center mt-8">
+                <input type="text" id="coupon-code" placeholder="Nhập mã giảm giá" class="flex-1 p-2 border border-gray-300 rounded-md h-10 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button id="apply-coupon" class="ml-2 px-4 bg-blue-600 text-white rounded-md h-10 hover:bg-blue-700 transition">
+                    Áp dụng
+                </button>
+            </div>
+            <p id="coupon-error" class="text-red-600 text-sm mt-1 hidden">Mã khuyến mãi không hợp lệ</p>
+
+            <div class="mt-4 border-t pt-4">
+                <p class="flex justify-between"><span>Tạm tính</span> <span id="subtotal-price">750.000đ</span></p>
+                <p class="flex focus:ring-2 focus:ring-blue-500 focus:outline-none justify-between font-bold text-lg"><span>Tổng cộng</span> <span id="total-price" class="text-blue-600">750.000đ</span></p>
+            </div>
+        </section>
+
+        <!-- Button giảm giá -->
+        <script>
+            document.getElementById("apply-coupon").addEventListener("click", function() {
+                const couponInput = document.getElementById("coupon-code");
+                const errorMessage = document.getElementById("coupon-error");
+
+                // Danh sách mã giảm giá hợp lệ
+                const validCoupons = ["DISCOUNT10", "SUMMER20", "SALE30"];
+
+                if (!validCoupons.includes(couponInput.value.trim().toUpperCase())) {
+                    couponInput.parentElement.classList.add("border-red-500");
+                    errorMessage.classList.remove("hidden");
+                } else {
+                    couponInput.parentElement.classList.remove("border-red-500");
+                    errorMessage.classList.add("hidden");
+                    alert("Mã giảm giá hợp lệ!");
+                }
+            });
+        </script>
+
+        <!-- Lấy thông tin tour từ tour-->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const params = new URLSearchParams(window.location.search);
+                const tourId = params.get("id");
+                const date = params.get("date") || "Chưa chọn";
+                const adults = params.get("adults") || 1;
+                const children = params.get("children") || 0;
+
+                if (!tourId) {
+                    document.getElementById("tour-name").textContent = "Lỗi: Không tìm thấy thông tin tour";
+                    return;
+                }
+
+                fetch(`http://localhost:5000/tours/${tourId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Không tìm thấy tour");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        document.getElementById("tour-name").textContent = data.name;
+                        document.getElementById("tour-image").src = data.image;
+                        document.getElementById("tour-date").textContent = date;
+                        document.getElementById("adult-count-display").textContent = adults;
+                        document.getElementById("child-count-display").textContent = children;
+
+                        const adultPrice = data.price * adults;
+                        const childPrice = (data.price * 0.7) * children;
+                        const totalPrice = adultPrice + childPrice;
+
+                        document.getElementById("subtotal-price").textContent = totalPrice.toLocaleString() + "₫";
+                        document.getElementById("total-price").textContent = totalPrice.toLocaleString() + "₫";
+                    })
+                    .catch(error => {
+                        console.error("Lỗi tải thông tin tour:", error);
+                        document.getElementById("tour-name").textContent = "Không tìm thấy tour";
+                    });
+            });
+        </script>
+
+    </main>
+
+    <!-- Gợi ý địa chỉ -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            loadProvinces();
+
+            document.getElementById("province-input").addEventListener("click", function() {
+                toggleDropdown("province");
+            });
+
+            document.getElementById("district-input").addEventListener("click", function() {
+                if (!document.getElementById("province-input").value) {
+                    alert("Vui lòng chọn tỉnh/thành phố trước");
+                    return;
+                }
+                toggleDropdown("district");
+            });
+
+            document.getElementById("ward-input").addEventListener("click", function() {
+                if (!document.getElementById("district-input").value) {
+                    alert("Vui lòng chọn quận/huyện trước");
+                    return;
+                }
+                toggleDropdown("ward");
+            });
+        });
+
+        // Gợi ý tên tỉnh/thành
+        async function loadProvinces() {
+            let response = await fetch("https://provinces.open-api.vn/api/?depth=1");
+            let data = await response.json();
+
+            let provinceList = document.getElementById("province-list");
+            provinceList.innerHTML = '<input type="text" id="province-search" class="w-full p-2 border-b focus:ring-0 focus:outline-none" placeholder="Tìm kiếm tỉnh/thành...">';
+
+            data.forEach(province => {
+                let li = document.createElement("li");
+                li.textContent = removePrefix(province.name);
+                li.dataset.fullName = province.name;
+                li.onclick = async() => {
+                    selectOption("province", province.name);
+                    await loadDistricts(province.name);
+                };
+                provinceList.appendChild(li);
+            });
+
+            // Thêm sự kiện tìm kiếm
+            document.getElementById("province-search").addEventListener("input", function() {
+                filterOptions(this.value, "province-list");
+            });
+        }
+
+        // Gợi ý tên Quận/Huyện
+        async function loadDistricts(provinceName) {
+            let response = await fetch("https://provinces.open-api.vn/api/?depth=2");
+            let data = await response.json();
+
+            let province = data.find(p => p.name === provinceName);
+            if (!province) return;
+
+            let districtList = document.getElementById("district-list");
+            districtList.innerHTML = '<input type="text" id="district-search" class="w-full p-2 border-b focus:ring-0 focus:outline-none" placeholder="Tìm kiếm quận/huyện...">';
+
+            province.districts.forEach(district => {
+                let li = document.createElement("li");
+                li.textContent = district.name;
+                li.onclick = async() => {
+                    selectOption("district", district.name);
+                    await loadWards(district.name);
+                };
+                districtList.appendChild(li);
+            });
+
+            document.getElementById("district-search").addEventListener("input", function() {
+                filterOptions(this.value, "district-list");
+            });
+
+            // Xóa dữ liệu cũ khi chọn tỉnh mới
+            document.getElementById("district-input").value = "";
+            document.getElementById("ward-input").value = "";
+            document.getElementById("ward-list").innerHTML = "";
+        }
+
+        // Gợi ý tên Phường/Xã
+        async function loadWards(districtName) {
+            let response = await fetch("https://provinces.open-api.vn/api/?depth=3");
+            let data = await response.json();
+
+            let district = data.flatMap(p => p.districts).find(d => d.name === districtName);
+            if (!district) return;
+
+            let wardList = document.getElementById("ward-list");
+            wardList.innerHTML = '<input type="text" id="ward-search" class="w-full p-2 border-b focus:ring-0 focus:outline-none" placeholder="Tìm kiếm phường/xã...">';
+
+            district.wards.forEach(ward => {
+                let li = document.createElement("li");
+                li.textContent = ward.name;
+                li.onclick = () => selectOption("ward", ward.name);
+                wardList.appendChild(li);
+            });
+
+            document.getElementById("ward-search").addEventListener("input", function() {
+                filterOptions(this.value, "ward-list");
+            });
+
+            // Xóa dữ liệu cũ khi chọn quận mới
+            document.getElementById("ward-input").value = "";
+        }
+
+        // Hàm chọn tỉnh/thành, quận/huyện, phường/xã
+        function selectOption(type, value) {
+            document.getElementById(`${type}-input`).value = value;
+            toggleDropdown(type);
+        }
+
+        // Hàm mở dropdown
+        function toggleDropdown(type) {
+            const dropdown = document.getElementById(`${type}-dropdown`);
+            const arrow = document.querySelector(`#${type}-input + .arrow`);
+            dropdown.classList.toggle("show");
+            arrow.classList.toggle("rotate");
+        }
+
+        // Hàm xóa tiền tố "Tỉnh" hoặc "Thành phố" khỏi tên tỉnh/thành
+        function removePrefix(name) {
+            return name.replace(/^(Tỉnh|Thành phố)\s+/i, '');
+        }
+
+        // Hàm tìm kiếm trong danh sách
+        function filterOptions(query, listId) {
+            let list = document.getElementById(listId);
+            let items = list.getElementsByTagName("li");
+
+            query = removeDiacritics(query).toLowerCase();
+
+            for (let item of items) {
+                let text = removeDiacritics(item.textContent).toLowerCase();
+                item.style.display = isMatching(text, query) ? "block" : "none";
+            }
+        }
+
+        // Hàm kiểm tra nếu từ nhập vào khớp với chữ cái đầu tiên của các từ trong tên
+        function isMatching(text, query) {
+            if (!query) return true; // Nếu không có gì nhập vào, hiển thị tất cả
+
+            let words = text.split(" ");
+            let queryParts = query.split(" ");
+
+            // So sánh từng phần của query với chữ cái đầu của từng từ trong text
+            for (let i = 0; i < queryParts.length; i++) {
+                if (i >= words.length || !words[i].startsWith(queryParts[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Hàm loại bỏ dấu tiếng Việt
+        function removeDiacritics(str) {
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+    </script>
+
+</body>
+</html>

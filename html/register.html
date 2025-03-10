@@ -10,54 +10,153 @@
     <script src="/js/footer.js" defer></script>
 </head>
 
-<body>
+<body class="bg-gray-100">
     <!-- Gọi header -->
     <my-header></my-header>
 
     <main class="container mx-auto p-5">
-        <div class="bg-white shadow-lg rounded-lg p-5 max-w-md mx-auto">
-            <h2 class="text-xl font-semibold mb-4">Đăng Ký</h2>
-            <form id="registerForm">
-                <label class="block mb-2">Tên đăng nhập</label>
-                <input type="text" id="username" class="w-full p-2 border rounded mb-4" placeholder="Nhập tên đăng nhập" required>
+        <div class="bg-white shadow-lg rounded-lg p-6 max-w-sm mx-auto mt-10">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-5">Đăng Ký</h2>
 
-                <label class="block mb-2">Email</label>
-                <input type="email" id="email" class="w-full p-2 border rounded mb-4" placeholder="Nhập email" required>
+            <form id="registerForm" class="space-y-3" autocomplete="off">
+                <!-- Username Input -->
+                <div class="space-y-1">
+                    <input type="text" id="username" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nhập tên đăng nhập" required>
+                    <p id="usernameError" class="text-red-500 text-sm mt-1 hidden">Tên đăng nhập đã tồn tại!</p>
+                    <!-- Thông báo lỗi -->
+                </div>
 
-                <label class="block mb-2">Mật Khẩu</label>
-                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Nhập mật khẩu" required>
+                <!-- Email Input -->
+                <div class="space-y-1">
+                    <input type="email" id="email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nhập email" required>
+                    <p id="emailError" class="text-red-500 text-sm mt-1 hidden">Email đã tồn tại!</p>
+                    <!-- Thông báo lỗi -->
+                </div>
 
-                <label class="block mb-2">Xác Nhận Mật Khẩu</label>
-                <input type="password" id="confirm-password" class="w-full p-2 border rounded mb-4" placeholder="Nhập lại mật khẩu" required>
+                <!-- Password Input -->
+                <div class="space-y-1">
+                    <input type="password" id="password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nhập mật khẩu" required>
+                </div>
 
-                <button type="submit">Đăng Ký</button>
+                <!-- Confirm Password Input -->
+                <div class="space-y-1">
+                    <input type="password" id="confirm-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nhập lại mật khẩu" required>
+                    <p id="passwordError" class="text-red-500 text-sm mt-1 hidden">Mật khẩu không khớp!</p>
+                </div>
+
+                <!-- Register Button -->
+                <button id="registerButton" type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                Đăng Ký
+            </button>
+
             </form>
+
+            <!-- Login Link -->
+            <p class="text-center text-gray-600 mt-4">
+                Đã có tài khoản?
+                <a href="login.html" class="text-blue-600 font-semibold hover:underline">Đăng nhập ngay</a>
+            </p>
+
+            <div class="flex items-center my-4">
+                <hr class="flex-grow border-gray-300">
+                <span class="px-3 text-gray-500 text-sm">Hoặc</span>
+                <hr class="flex-grow border-gray-300">
+            </div>
+
+            <!-- Nút Đăng ký bằng Google -->
+            <div class="flex justify-center mb-4">
+                <button id="googleSignUp">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" class="w-5 h-5">
+                    Đăng ký với Google
+                </button>
+            </div>
         </div>
     </main>
 
-    <p id="message"></p>
+    <!-- Thêm thư viện Google API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
+    <!-- GOOGLE-->
     <script>
-        async function registerUser(event) {
+        function handleCredentialResponse(response) {
+            // Giải mã JWT của Google để lấy thông tin người dùng
+            const responsePayload = JSON.parse(atob(response.credential.split(".")[1]));
+
+            console.log("ID: " + responsePayload.sub);
+            console.log("Tên: " + responsePayload.name);
+            console.log("Email: " + responsePayload.email);
+
+            // Gửi dữ liệu đăng ký lên server
+            fetch("http://localhost:5000/google-auth", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: responsePayload.email,
+                        googleId: responsePayload.sub
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.token) {
+                        alert("Đăng ký & Đăng nhập thành công! Chuyển hướng...");
+                        localStorage.setItem("token", data.token);
+                        window.location.href = "home.html";
+                    } else {
+                        alert("Lỗi khi đăng ký: " + data.error);
+                    }
+                })
+                .catch(error => console.error("Lỗi khi đăng ký bằng Google:", error));
+        }
+
+        window.onload = function() {
+            google.accounts.id.initialize({
+                client_id: "117404146592-0p3leqbrblnuoilrmndvael35t6gmbop.apps.googleusercontent.com", // Thay bằng Client ID thật
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("googleSignUp"), {
+                    theme: "filled_blue",
+                    size: "large"
+                }
+            );
+        };
+    </script>
+
+    <!-- Kiểm tra logic đăng ký -->
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
             event.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            const messageElement = document.getElementById('message');
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirm-password').value.trim();
+            const usernameError = document.getElementById('usernameError');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const registerButton = document.getElementById('registerButton');
+
+            // Reset lỗi trước khi kiểm tra
+            usernameError.classList.add('hidden');
+            emailError.classList.add('hidden');
+            passwordError.classList.add('hidden');
 
             if (password !== confirmPassword) {
-                messageElement.textContent = 'Mật khẩu không khớp!';
-                messageElement.style.color = 'red';
+                passwordError.classList.remove('hidden');
+                passwordError.textContent = "Mật khẩu không khớp!";
                 return;
             }
+
+            registerButton.disabled = true;
+            registerButton.textContent = "Đang đăng ký...";
 
             try {
                 const response = await fetch('http://localhost:5000/register', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
                         username,
@@ -68,23 +167,31 @@
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    messageElement.textContent = 'Đăng ký thành công!';
-                    messageElement.style.color = 'green';
-                    setTimeout(() => {
-                        window.location.href = 'watch.html'; // Điều hướng sau khi đăng nhập thành công
-                    }, 10);
-                } else {
-                    messageElement.textContent = `Đăng ký thất bại: ${data.message || 'Lỗi không xác định'}`;
-                    messageElement.style.color = 'red';
+                if (!response.ok) {
+                    if (data.error === "Tên đăng nhập đã tồn tại") {
+                        usernameError.classList.remove('hidden');
+                        usernameError.textContent = "Tên đăng nhập đã tồn tại!";
+                    } else if (data.error === "Email đã tồn tại") {
+                        emailError.classList.remove('hidden');
+                        emailError.textContent = "Email đã tồn tại!";
+                    } else {
+                        alert("Lỗi không xác định! Vui lòng thử lại.");
+                    }
+                    return;
                 }
-            } catch (error) {
-                messageElement.textContent = 'Đăng ký thất bại. Vui lòng thử lại.';
-                messageElement.style.color = 'red';
-            }
-        }
 
-        document.getElementById('registerForm').addEventListener('submit', registerUser);
+                // Đăng ký thành công
+                localStorage.setItem('token', data.token);
+                alert('Đăng ký thành công!');
+                window.location.href = 'home.html';
+
+            } catch (error) {
+                alert("Lỗi kết nối đến server! Vui lòng thử lại.");
+            } finally {
+                registerButton.disabled = false;
+                registerButton.textContent = "Đăng Ký";
+            }
+        });
     </script>
     <!-- Gọi footer -->
     <my-footer></my-footer>

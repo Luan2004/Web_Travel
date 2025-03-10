@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Tour - Vịnh Hạ Long</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/header.js" defer></script>
+    <script src="/js/footer.js" defer></script>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Gọi header -->
+    <my-header></my-header>
+
+    <main class="container mx-auto p-5">
+        <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
+            <!-- Tiêu đề -->
+            <h3 id="tour-title" class="text-xl font-semibold mb-4"></h3>
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Phần trái: Hình ảnh & mô tả -->
+                <div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <img id="tour-image" class="w-full rounded-lg mb-4">
+                        <img id="tour-image2" class="w-full h-24 object-cover rounded-lg">
+                        <img id="tour-image3" class="w-full h-24 object-cover rounded-lg">
+                    </div>
+                    <p class="mt-4 flex items-center">
+                        <a href="#" class="text-blue-600 hover:underline ml-1">Thêm vào yêu thích</a>
+                    </p>
+                    <p id="tour-description" class="mt-4 text-gray-700"></p>
+                    <strong>Thời gian:</strong> <span id="tour-duration"></span>
+                    </p>
+                </div>
+                <!-- Phần phải: Giá và đặt vé -->
+                <div class="bg-gray-50 p-6 rounded-lg shadow-md">
+                    <h3 class="text-lg font-semibold" id="tour-name"></h3>
+                    <p class="mt-2 text-gray-500 line-through" id="tour-old-price"></p>
+                    <p class="text-red-600 text-2xl font-bold flex items-center justify-between">
+                        <span id="tour-price"></span>
+                        <span class="price-save bold text-red-600 border-2 border-red-600 px-2 py-1 rounded-md" id="tour-discount"></span>
+                    </p>
+
+                    <label for="date" class="block mt-4 font-semibold">Thời gian đi</label>
+                    <input type="date" alt="Chọn ngày đi" id="date" class="w-full border p-2 rounded mt-1">
+
+                    <p class="mt-4 font-semibold">Hành khách</p>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="w-1/3">Người lớn (10-80)</span>
+                        <input type="number" value="1" min="0" id="adult-count" class="border p-1 w-16 text-center rounded">
+                        <span id="adult-price" class="w-1/3 text-center"></span>
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="w-1/3">Trẻ em (5-9)</span>
+                        <input type="number" value="0" min="0" id="child-count" class="border p-1 w-16 text-center rounded">
+                        <span id="child-price" class="w-1/3 text-center"></span>
+                    </div>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="w-1/3">Em bé (1-4)</span>
+                        <input type="number" value="0" min="0" id="baby-count" class="border p-1 w-16 text-center rounded">
+                        <span class="w-1/3 text-center">0₫</span>
+                    </div>
+
+                    <p class="mt-4 font-semibold text-lg">Tổng tiền:
+                        <span class="text-red-600 font-bold" id="total-price"></span>
+                    </p>
+
+                    <button id="book-tour" class="w-full bg-blue-600 text-white py-2 mt-4 rounded-lg hover:bg-blue-700 transition">
+                        Đặt ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lấy thông tin và hiển thị tour được click -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const params = new URLSearchParams(window.location.search);
+                let tourId = params.get("id");
+                let selectedDate = params.get("date") || "";
+                let adultCount = params.get("adults") || "1";
+                let childCount = params.get("children") || "0";
+            
+                // Nếu `tourId` không tồn tại trong URL, thử lấy từ `localStorage`
+                if (!tourId) {
+                    tourId = localStorage.getItem("lastTourId");
+                    selectedDate = localStorage.getItem("lastDate") || "";
+                    adultCount = localStorage.getItem("lastAdults") || "1";
+                    childCount = localStorage.getItem("lastChildren") || "0";
+                }
+            
+                if (!tourId) {
+                    document.body.innerHTML = "<h2 class='text-center text-red-600'>Lỗi: Không tìm thấy tour!</h2>";
+                    return;
+                }
+            
+                fetch(`http://localhost:5000/tours/${tourId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                    document.getElementById("tour-title").textContent = data.name;
+                    document.getElementById("tour-image").src = data.image;
+                    document.getElementById("tour-image2").src = data.image2;
+                    document.getElementById("tour-image3").src = data.image3;
+                    document.getElementById("tour-description").textContent = data.description;
+                    document.getElementById("tour-duration").textContent = data.duration;
+                    // Hiển thị ngày đi và số lượng khách
+                    document.getElementById("date").value = selectedDate;
+                    document.getElementById("adult-count").value = adultCount;
+                    document.getElementById("child-count").value = childCount;
+        
+                    // Định dạng giá với dấu chấm phân cách
+                    const formattedPrice = data.price.toLocaleString();
+                    document.getElementById("tour-price").textContent = formattedPrice + "₫";
+
+                    if (data.old_price) {
+                        const formattedOldPrice = data.old_price.toLocaleString();
+                        document.getElementById("tour-old-price").textContent = formattedOldPrice + "₫";
+                    }
+
+                    // Tính toán và hiển thị giá giảm
+                    if (data.old_price && data.price < data.old_price) {
+                        const discount = Math.round(100 * (data.old_price - data.price) / data.old_price);
+                        document.getElementById("tour-discount").textContent = `-${discount}%`;
+                    } else {
+                        document.getElementById("tour-discount").textContent = "";
+                    }
+
+                    // Cập nhật giá cho từng đối tượng (người lớn, trẻ em)
+                    const formattedAdultPrice = data.price.toLocaleString();
+                    document.getElementById("adult-price").textContent = formattedAdultPrice + "₫";
+                    const formattedChildPrice = (data.price * 0.7).toLocaleString();
+                    document.getElementById("child-price").textContent = formattedChildPrice + "₫"; // Giảm giá 30% cho trẻ em
+
+                    // Tính toán tổng tiền dựa trên số lượng hành khách
+                    function updateTotalPrice() {
+                        let adultCount = parseInt(document.getElementById("adult-count").value);
+                        let childCount = parseInt(document.getElementById("child-count").value);
+                        let adultPrice = parseFloat(data.price);
+                        let childPrice = adultPrice * 0.7; // Giá giảm cho trẻ em
+                        let total = (adultCount * adultPrice) + (childCount * childPrice);
+
+                        // Hiển thị tổng tiền đã được định dạng
+                        document.getElementById("total-price").textContent = total.toLocaleString() + "₫";
+                        
+                    }
+                    document.getElementById("adult-count").addEventListener("input", updateTotalPrice);
+                        document.getElementById("child-count").addEventListener("input", updateTotalPrice);
+                        updateTotalPrice(); // Cập nhật lần đầu
+                })      
+            })
+                    .catch(error => {
+                        console.error("Lỗi tải thông tin tour:", error);
+                        document.getElementById("tour-name").textContent = "Không tìm thấy tour";
+                    });          
+        </script>
+
+        <!-- Logic button Đặt ngay -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const bookNowButton = document.getElementById("book-tour");
+                bookNowButton.addEventListener("click", function (event) {
+                    event.preventDefault(); // Ngăn chặn hành động mặc định
+            
+                    let dateInput = document.getElementById("date").value;
+                    let adultCount = parseInt(document.getElementById("adult-count").value);
+                    let childCount = parseInt(document.getElementById("child-count").value);
+                    const params = new URLSearchParams(window.location.search);
+                    const tourId = params.get("id");
+
+                    if (!tourId) {
+                        alert("Lỗi: Không có ID tour!");
+                        return;
+                    }
+
+                    if (!dateInput) {
+                        alert("Vui lòng chọn ngày đi!");
+                        return;
+                    }
+
+                    // Lấy ngày hiện tại và kiểm tra
+                    let today = new Date();
+                    today.setHours(0, 0, 0, 0); // Đặt thời gian về 00:00 để so sánh chính xác
+
+                    let selectedDate = new Date(dateInput);
+                    selectedDate.setHours(0, 0, 0, 0);
+
+                    let diffDays = (selectedDate - today) / (1000 * 60 * 60 * 24); // Chênh lệch số ngày
+
+                    if (diffDays < 1) {
+                        alert("Vui lòng chọn ngày đi cách ít nhất 1 ngày từ hôm nay!");
+                        return;
+                    }
+
+                    // Chuyển hướng đến book.html với tham số URL
+                    let url = `book.html?id=${tourId}&date=${encodeURIComponent(dateInput)}&adults=${adultCount}&children=${childCount}`;
+                    window.location.href = url;
+                });
+            });
+        </script>
+
+    </main>
+    <!-- Gọi footer -->
+    <my-footer></my-footer>
+</body>
+
+</html>

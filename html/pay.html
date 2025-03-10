@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Method</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const params = new URLSearchParams(window.location.search);
+        const totalAmount = params.get("amount") || "0";
+        
+        // Lưu tổng tiền vào localStorage để chuyển tiếp sang trang qr.html
+        localStorage.setItem("totalAmount", totalAmount);
+    });
+    
+    function redirectToQR(paymentMethod) {
+        const params = new URLSearchParams(window.location.search);
+        const totalAmount = localStorage.getItem("totalAmount") || "0";
+        const orderId = "ORD" + Math.floor(Math.random() * 1000000); // Random order ID
+    
+        const tourId = params.get("id") || "";
+        const date = params.get("date") || "";
+        const adults = params.get("adults") || "1";
+        const children = params.get("children") || "0";
+    
+        // Store necessary booking details in localStorage
+        localStorage.setItem("lastTourId", tourId);
+        localStorage.setItem("lastDate", date);
+        localStorage.setItem("lastAdults", adults);
+        localStorage.setItem("lastChildren", children);
+    
+        // Redirect to QR payment page with all details
+        const url = `qr.html?method=${encodeURIComponent(paymentMethod)}&amount=${totalAmount}&order=${orderId}&id=${tourId}&date=${date}&adults=${adults}&children=${children}`;
+        window.location.href = url;
+    }
+</script>
+<body class="bg-gray-100">
+
+    <div class="max-w-lg mx-auto bg-white p-6 mt-10 rounded-lg shadow-md">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <button onclick="goBack()" class="text-blue-600 font-semibold">&larr; Back</button>
+            <img src="vnpay-logo.png" alt="VNPay Logo" class="h-10">
+            <img src="goodmorning-travel.png" alt="Good Morning Travel" class="h-10">
+        </div>
+
+        <!-- Title -->
+        <h2 class="text-xl font-semibold text-center mb-4">Select Payment Method</h2>
+
+        <!-- Payment Options -->
+        <div class="space-y-4">
+            <div onclick="redirectToQR('VNPAY-QR')" class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span class="font-semibold text-red-600">VNPAY</span> QR scanner apps
+                <img src="vnpay-qr.png" alt="VNPay QR" class="h-8">
+            </div>
+
+            <div onclick="redirectToQR('Domestic-Bank')" class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                Domestic card and bank account
+                <img src="bank-icon.png" alt="Bank Icon" class="h-8">
+            </div>
+
+            <div onclick="redirectToQR('International-Card')" class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                International payment cards
+                <img src="visa-mastercard.png" alt="Visa Mastercard" class="h-8">
+            </div>
+
+            <div onclick="redirectToQR('VNPAY-Ewallet')" class="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-100 cursor-pointer">
+                <span class="font-semibold text-red-600">VNPAY</span> E-Wallets
+                <img src="vnpay-ewallet.png" alt="VNPay E-Wallet" class="h-8">
+            </div>
+        </div>
+
+
+        <!-- Footer -->
+        <div class="mt-6 text-center">
+            <a href="tel:1900555577" class="text-blue-600 font-semibold">📞 1900.5555.77</a>
+            <span class="mx-2">|</span>
+            <a href="mailto:hotrovnpay@vnpay.vn" class="text-blue-600 font-semibold">📧 hotrovnpay@vnpay.vn</a>
+
+            <div class="flex justify-center mt-4 space-x-4">
+                <img src="secure-logo.png" alt="Secure" class="h-10">
+                <img src="pci-dss.png" alt="PCI DSS" class="h-10">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+
+</body>
+
+</html>

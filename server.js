@@ -22,7 +22,8 @@ const db = new sqlite3.Database('./database.db', (err) => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
+            password TEXT,
+            googleId TEXT UNIQUE
         )`, (err) => {
             if (err) {
                 console.error("❌ Lỗi tạo bảng Users:", err.message);
@@ -56,6 +57,7 @@ const db = new sqlite3.Database('./database.db', (err) => {
 // Đảm bảo phục vụ thư mục tĩnh
 app.use(express.static(path.join(__dirname, 'html')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
+app.use('/img', express.static(path.join(__dirname, 'img')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'html', 'home.html'));
@@ -73,8 +75,8 @@ app.get('/register', (req, res) => {
     res.sendFile(path.join(__dirname, 'html', 'register.html'));
 });
 
-app.get('/detail', (req, res) => {
-    res.sendFile(path.join(__dirname, 'html', 'detail.html'));
+app.get('/tour', (req, res) => {
+    res.sendFile(path.join(__dirname, 'html', 'tour.html'));
 });
 
 app.get('/tours', (req, res) => {
@@ -102,42 +104,85 @@ app.get('/tours/:id', (req, res) => {
     });
 });
 
+// Đăng ký & Đăng nhập bằng Google với debug lỗi chi tiết
+app.post('/google-auth', async(req, res) => {
+    const { email, googleId, name } = req.body;
+
+    if (!email || !googleId || !name) {
+        console.error("❌ Lỗi: email, googleId hoặc tên bị thiếu!");
+        return res.status(400).json({ error: "Thiếu email, Google ID hoặc tên người dùng!" });
+    }
+
+    db.get("SELECT * FROM Users WHERE email = ?", [email], async(err, user) => {
+        if (err) {
+            console.error("❌ Lỗi truy vấn database:", err);
+            return res.status(500).json({ error: "Lỗi truy vấn database!" });
+        }
+
+        if (user) {
+            // Nếu user tồn tại, kiểm tra googleId
+            const isMatch = await bcrypt.compare(googleId, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: "Google ID không khớp!" });
+            }
+            console.log("✅ User đã tồn tại, tạo token đăng nhập!");
+            const token = jwt.sign({ id: user.id, email: user.email }, 'secretkey', { expiresIn: '1h' });
+            return res.status(200).json({ message: "Đăng nhập thành công!", token });
+        }
+
+        // Nếu chưa có tài khoản, mã hóa googleId và đăng ký
+        const hashedPassword = await bcrypt.hash(googleId, 10);
+        db.run("INSERT INTO Users (username, email, password, googleId) VALUES (?, ?, ?, ?)", [name, email, hashedPassword, googleId], function(err) {
+            if (err) {
+                console.error("❌ Lỗi khi chèn dữ liệu vào Users:", err);
+                return res.status(500).json({ error: "Lỗi khi đăng ký tài khoản mới!" });
+            }
+            console.log("✅ Đăng ký mới thành công! Tạo token...");
+            const token = jwt.sign({ id: this.lastID, email }, 'secretkey', { expiresIn: '1h' });
+            res.status(201).json({ message: "Đăng ký & Đăng nhập thành công!", token });
+        });
+    });
+});
+
 // 🟢 API Đăng ký
-app.post('/register', async(req, res) => {
+app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Vui lòng nhập đầy đủ thông tin!' });
-    }
+    // Kiểm tra username hoặc email đã tồn tại chưa
+    db.get("SELECT * FROM Users WHERE username = ? OR email = ?", [username, email], (err, existingUser) => {
+        if (err) {
+            console.error("❌ Lỗi kiểm tra user:", err);
+            return res.status(500).json({ error: "Lỗi server!" });
+        }
 
-    try {
-        // Kiểm tra email đã tồn tại chưa
-        db.get(`SELECT * FROM Users WHERE email = ?`, [email], async(err, existingUser) => {
+        if (existingUser) {
+            if (existingUser.username === username) {
+                return res.status(400).json({ error: "Tên đăng nhập đã tồn tại" });
+            }
+            if (existingUser.email === email) {
+                return res.status(400).json({ error: "Email đã tồn tại" });
+            }
+        }
+
+        // Mã hóa mật khẩu trước khi lưu vào database
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
             if (err) {
-                console.error('❌ Lỗi truy vấn:', err);
-                return res.status(500).json({ error: 'Lỗi truy vấn database' });
-            }
-            if (existingUser) {
-                return res.status(400).json({ error: 'Email đã tồn tại!' });
+                console.error("❌ Lỗi mã hóa mật khẩu:", err);
+                return res.status(500).json({ error: "Lỗi server!" });
             }
 
-            // Mã hóa mật khẩu
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            // Chèn dữ liệu vào database
-            db.run(`INSERT INTO Users (username, email, password) VALUES (?, ?, ?)`, [username, email, hashedPassword], function(err) {
-                if (err) {
-                    console.error('❌ Lỗi chèn dữ liệu:', err);
-                    return res.status(500).json({ error: 'Lỗi khi lưu thông tin người dùng' });
+            // Chèn user vào database
+            db.run("INSERT INTO Users (username, email, password) VALUES (?, ?, ?)", [username, email, hashedPassword],
+                function(insertErr) {
+                    if (insertErr) {
+                        console.error("❌ Lỗi chèn dữ liệu:", insertErr);
+                        return res.status(500).json({ error: "Lỗi khi tạo tài khoản!" });
+                    }
+                    res.status(201).json({ message: "Đăng ký thành công!" });
                 }
-                console.log(`✅ Người dùng đăng ký thành công: ${username}, Email: ${email}`);
-                res.status(201).json({ message: 'Đăng ký thành công!' });
-            });
+            );
         });
-    } catch (err) {
-        console.error('❌ Lỗi đăng ký:', err);
-        res.status(500).json({ error: 'Lỗi máy chủ' });
-    }
+    });
 });
 
 

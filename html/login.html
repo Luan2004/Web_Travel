@@ -15,63 +15,101 @@
     <my-header></my-header>
 
     <main class="container mx-auto p-5">
-        <div class="bg-white shadow-lg rounded-lg p-5 max-w-md mx-auto">
-            <h2 class="text-xl font-semibold mb-4">Đăng Nhập</h2>
-            <form id="loginForm">
-                <label class="block mb-2">Email</label>
-                <input type="email" id="login-email" class="w-full p-2 border rounded mb-4" placeholder="Nhập email" required>
+        <div class="bg-white shadow-lg rounded-lg p-6 max-w-sm mx-auto mt-10">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Đăng Nhập</h2>
 
-                <label class="block mb-2">Mật Khẩu</label>
-                <input type="password" id="login-password" class="w-full p-2 border rounded mb-4" placeholder="Nhập mật khẩu" required>
+            <form id="loginForm" class="space-y-4">
+                <!-- Email Input -->
+                <div class="space-y-1">
+                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <div class="relative">
+                        <input type="email" id="login-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pl-10" placeholder="Nhập email" required>
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H3m13 0a4 4 0 100-8 4 4 0 000 8zm0 0a4 4 0 110 8 4 4 0 010-8z" />
+                        </svg>
+                    </div>
+                </div>
 
-                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded w-full hover:bg-blue-700">Đăng Nhập</button>
+                <!-- Password Input -->
+                <div class="space-y-1">
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Mật Khẩu</label>
+                    <div class="relative">
+                        <input type="password" id="login-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pl-10" placeholder="Nhập mật khẩu" required>
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 12h16m-7 4h7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                    Đăng Nhập
+                </button>
             </form>
+
+            <!-- Google Login Button -->
+            <div class="flex items-center my-4">
+                <hr class="flex-grow border-gray-300">
+                <span class="px-3 text-gray-500 text-sm">Hoặc</span>
+                <hr class="flex-grow border-gray-300">
+            </div>
+
+            <div class="flex justify-center mb-4">
+                <button id="googleLogin" class="flex items-center space-x-2 bg-white border border-gray-300 px-4 py-2 rounded-lg shadow hover:bg-gray-100">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google Logo" class="w-5 h-5">
+                    <span>Đăng nhập với Google</span>
+                </button>
+            </div>
+
+            <!-- Register Link -->
+            <p class="text-center text-gray-600 mt-4">
+                Bạn chưa có tài khoản?
+                <a href="register.html" class="text-blue-600 font-semibold hover:underline">Đăng ký ngay</a>
+            </p>
         </div>
-        <a href="register.html" class="text-blue-600 text-center mb-4 block">Đăng ký</a>
+
         <p id="login-message"></p>
 
+        <!-- GOOGLE LOGIN SCRIPT -->
         <script>
-            async function loginUser(event) {
-                event.preventDefault();
+            document.getElementById("googleLogin").addEventListener("click", function() {
+                google.accounts.id.prompt();
+            });
 
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                const messageElement = document.getElementById('login-message');
+            function handleCredentialResponse(response) {
+                const responsePayload = JSON.parse(atob(response.credential.split(".")[1]));
 
-                try {
-                    const response = await fetch('http://localhost:5000/login', {
-                        method: 'POST',
+                fetch("http://localhost:5000/login-google", {
+                        method: "POST",
                         headers: {
-                            'Content-Type': 'application/json',
+                            "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
-                            email,
-                            password
-                        }),
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        messageElement.textContent = 'Đăng nhập thành công!';
-                        messageElement.style.color = 'green';
-                        localStorage.setItem('token', data.token); // Lưu token nếu cần
-                        setTimeout(() => {
-                            window.location.href = 'home.html#tour-list'; // Điều hướng sau khi đăng nhập thành công
-                        }, 10);
-                    } else {
-                        messageElement.textContent = data.error || 'Đăng nhập thất bại!';
-                        messageElement.style.color = 'red';
-                    }
-                } catch (error) {
-                    messageElement.textContent = 'Lỗi kết nối đến server!';
-                    messageElement.style.color = 'red';
-                }
+                            email: responsePayload.email
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.token) {
+                            alert("Đăng nhập thành công!");
+                            localStorage.setItem("token", data.token);
+                            window.location.href = "home.html";
+                        } else {
+                            alert("Đăng nhập thất bại: " + data.error);
+                        }
+                    })
+                    .catch(error => console.error("Lỗi đăng nhập Google:", error));
             }
 
-            document.getElementById('loginForm').addEventListener('submit', loginUser);
+            window.onload = function() {
+                google.accounts.id.initialize({
+                    client_id: "YOUR_GOOGLE_CLIENT_ID", // Thay bằng Client ID thực tế
+                    callback: handleCredentialResponse
+                });
+            };
         </script>
     </main>
+
     <!-- Gọi footer -->
     <my-footer></my-footer>
 </body>

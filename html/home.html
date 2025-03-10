@@ -6,39 +6,178 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Tour Việt Nam</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="header.js" defer></script>
-    <script src="footer.js" defer></script>
+    <script src="/js/header.js" defer></script>
+    <script src="/js/footer.js" defer></script>
+    <style>
+        #micWave {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: rgba(128, 128, 128, 0.6);
+            border-radius: 50%;
+            opacity: 0;
+            transform: scale(1);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        
+        .animate-pulse {
+            animation: pulseEffect 1s infinite;
+        }
+        
+        @keyframes pulseEffect {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.6);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+        }        
+    </style>
 </head>
+
+<!-- Kiểm tra đăng nhập chưa -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const authButton = document.getElementById("authButton");
+
+        // Kiểm tra xem người dùng đã đăng nhập hay chưa
+        const isLoggedIn = localStorage.getItem("token"); // Token lưu sau khi đăng nhập
+
+        if (isLoggedIn) {
+            authButton.innerHTML = `
+                <span class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                    </svg>
+                    Đăng xuất
+                </span>
+            `;
+            authButton.addEventListener("click", function() {
+                localStorage.removeItem("token"); // Xóa token
+                window.location.href = "home.html"; // Chuyển hướng về trang chủ
+            });
+        } else {
+            authButton.innerHTML = "Đăng nhập";
+            authButton.addEventListener("click", function() {
+                window.location.href = "login.html"; // Điều hướng đến trang đăng nhập
+            });
+        }
+    });
+</script>
 
 <body class="bg-gray-100">
     <!-- Header -->
-    <header class="bg-blue-600 text-white py-4 px-6 flex justify-between items-center">
-        <a href="home.html">
-            <img src="https://img.lovepik.com/png/20231001/travel-logo-design-free-logo-design-template-navigation-tourism_46437_wh860.png" alt="Travel Logo" class="h-16">
-        </a>
-        <nav>
-            <ul class="flex space-x-6">
-                <li><a href="#" class="hover:underline">Trang chủ</a></li>
-                <li><a href="#tour-list" class="hover:underline">Tours</a></li>
-                <li><a href="#" class="hover:underline">Liên hệ</a></li>
-            </ul>
-        </nav>
-        <button onclick="window.location.href='login.html'" class="bg-white text-blue-600 px-4 py-2 rounded-lg border border-blue-600 w-full sm:w-auto hover:bg-blue-600 hover:text-white transition">
-            Đăng nhập
-        </button>
-    </header>
+    <my-header></my-header>
 
     <!-- Search -->
-    <section class="relative w-full h-96 bg-cover bg-center" style="background-image: url('https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2022/7/13/1067753/Tu-Hao-Vinh-Ha-Long-.jpg');">
-        <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white">
-            <h2 class="text-4xl font-bold mb-4">Khám phá Việt Nam tuyệt vời</h2>
-            <div class="relative">
-                <input id="searchInput" type="text" placeholder="Tìm kiếm tour..." class="px-4 py-2 w-80 text-black rounded-lg">
+    <section class="relative w-full h-[500px] bg-cover bg-center" style="background-image: url('https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2022/7/13/1067753/Tu-Hao-Vinh-Ha-Long-.jpg');">
+        <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white space-y-4">
+            <h2 class="text-4xl text-center font-bold mb-2 mt-[-150px]">Khám phá Việt Nam tuyệt vời</h2>
+            <div class="relative text-center">
+                <input id="searchInput" type="text" placeholder="Tìm kiếm tour..." class="px-4 py-2 w-[400px] text-black rounded-lg pl-10">
                 <ul id="suggestions" class="absolute w-full bg-white text-black rounded-lg shadow-md hidden"></ul>
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14zm7 7h.01M21 21l-6-6"></path>
+                </svg>
+                <!-- Biểu tượng micro -->
+                <button id="voiceSearch" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-600 transition-all duration-300">
+                    <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm6-3v1a6 6 0 01-12 0v-1m12 0a6 6 0 01-12 0m12 0V9m-12 0v2"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </section>
 
+    <!-- Khung mic -->
+    <div id="voiceModal" class="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center hidden">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-[450px] h-[300px] text-center relative flex flex-col justify-center items-center">
+            <h2 class="text-2xl font-semibold mb-4">Listening...</h2>
+            <button onclick="closeVoiceModal()" class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 text-xl">
+                ✕
+            </button>
+            <div class="flex justify-center mt-4 relative">
+                <!-- Vùng chứa mic và hiệu ứng vòng tròn nhấp nháy -->
+                <div id="micContainer" class="relative flex justify-center items-center">
+                    <!-- Vòng tròn xám hiệu ứng -->
+                    <div id="micWave" class="absolute w-24 h-24 bg-gray-300 rounded-full opacity-0 transition-all duration-300"></div>
+                    <!-- Nút mic màu đỏ -->
+                    <button id="micButton" class="bg-red-600 p-5 rounded-full shadow-md relative z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm6-3v1a6 6 0 01-12 0v-1m12 0a6 6 0 01-12 0m12 0V9m-12 0v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Tìm kiếm bằng giọng nói -->
+    <script>
+        document.getElementById('voiceSearch').addEventListener('click', function () {
+            const micWave = document.getElementById('micWave'); // Vòng tròn nhấp nháy
+            const voiceModal = document.getElementById('voiceModal'); // Modal hộp thoại
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        
+            // Mở modal khi nhấn vào mic
+            voiceModal.classList.remove('hidden');
+        
+            recognition.lang = 'vi-VN'; // Ngôn ngữ tiếng Việt
+            recognition.start();
+        
+            // Nếu sau 20 giây không có kết quả thì tắt
+            const timeout = setTimeout(() => {
+                recognition.stop();
+                closeVoiceModal();
+            }, 20000);
+        
+            // Khi phát hiện âm thanh, vòng tròn nhấp nháy
+            recognition.onaudiostart = function () {
+                micWave.classList.add('animate-pulse', 'opacity-100');
+            };
+        
+            recognition.onresult = function (event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('searchInput').value = transcript;
+                
+                // Khi có kết quả, tắt hiệu ứng và đóng modal
+                clearTimeout(timeout);
+                micWave.classList.remove('animate-pulse', 'opacity-100');
+                recognition.stop();
+                closeVoiceModal();
+            };
+        
+            recognition.onspeechend = function () {
+                recognition.stop();
+                clearTimeout(timeout);
+                micWave.classList.remove('animate-pulse', 'opacity-100');
+                closeVoiceModal();
+            };
+        
+            recognition.onerror = function (event) {
+                console.error('Lỗi nhận diện giọng nói:', event.error);
+                clearTimeout(timeout);
+                micWave.classList.remove('animate-pulse', 'opacity-100');
+                closeVoiceModal();
+            };
+        });
+        
+        // Hàm đóng modal khi bấm X hoặc kết thúc
+        function closeVoiceModal() {
+            document.getElementById('voiceModal').classList.add('hidden');
+            document.getElementById('micWave').classList.remove('animate-pulse', 'opacity-100');
+        }        
+    </script>
+
+    <!-- Truyền từ khóa search -->
     <script>
         const search = document.getElementById("searchInput");
 
@@ -110,7 +249,7 @@
 
     <!-- Danh sách tours -->
     <section class="py-10 px-6">
-        <h2 class="text-3xl font-bold text-center mb-6">Tour nổi bật</h2>
+        <h2 id="hot-tour" class="text-3xl font-bold text-center mb-6">Tour nổi bật</h2>
         <div id="tour-list" class="grid grid-cols-1 md:grid-cols-4 gap-6"></div>
     </section>
 
@@ -147,12 +286,12 @@
                                 <p class="text-gray-700 font-bold text-red-600 text-xl">${tour.price.toLocaleString()}đ</p>
                                 ${discountText} <!-- Hiển thị discount với đường viền -->
                             </div>
-                            <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Đặt ngay</button>
+                            <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg">Xem Tour ></button>
                         `;
 
                         // Chuyển đến trang chi tiết khi click
                         tourItem.addEventListener("click", () => {
-                            window.location.href = `detail.html?id=${tour.id}`;
+                            window.location.href = `tour.html?id=${tour.id}`;
                         });
 
                         tourContainer.appendChild(tourItem);
@@ -164,49 +303,7 @@
 
 
     <!-- Footer -->
-    <footer class="footer lazyload_bg loaded" data-src="//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107" style="background-image: url(&quot;//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107&quot;);">
-        <div class="container px-6" bis_skin_checked="1">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="col-12 col-md-6 col-lg-3 col-footer col-info" bis_skin_checked="1">
-                    <h4 class="text-xl font-bold mt-4">THÔNG TIN LIÊN HỆ</h4>
-                    <div class="hidden-mobile" bis_skin_checked="1">
-                        <span class="d-block mb-1">Tên công ty</span>
-                        <p>CÔNG TY CỔ PHẦN DU LỊCH CHÀO NGÀY MỚI</p>
-                        <span class="d-block mb-1">Địa chỉ</span>
-                        <p>Tổ 2 Trường Sơn, Phường Vĩnh Trường, Thành phố Nha Trang, Tỉnh Khánh Hòa, Việt Nam<br>
-                            <a href="tel:0902288296" class="d-block" title="0902288296">Hỗ trợ: 0902288296</a>
-                        </p>
-                        <span class="d-block mb-1">Giấy phép kinh doanh lữ hành số:</span>
-                        <p>56-303/2024/TCDL-GP LHQT</p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3 col-footer col-info">
-                    <h4 class="text-xl font-bold mt-4">CHĂM SÓC KHÁCH HÀNG</h4>
-                    <div class="hidden-mobile" bis_skin_checked="1">
-                        <span class="d-block mb-1">Thời gian hỗ trợ</span>
-                        <p>8H - 22H Hàng ngày</p>
-                        <span class="d-block mb-1">Hotline</span>
-                        <p><a href="tel:02586505986" title="0258 650 5986">0258 650 5986</a></p>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 col-lg-3 col-footer col-menu">
-                    <h4 class="text-xl font-bold mt-4">CHÍNH SÁCH</h4>
-                    <ul class="list-menu hidden-mobile list-unstyled">
-                        <li><a href="/phuong-thuc-thanh-toan" title="Phương thức thanh toán" class="d-block py-2">Phương thức thanh toán</a></li>
-                        <li><a href="/chinh-sach-bao-mat-thong-tin" title="Chính sách bảo mật thông tin" class="d-block py-2">Chính sách bảo mật thông tin</a></li>
-                        <li><a href="/huong-dan-dat-tour" title="Hướng dẫn đặt tour" class="d-block py-2">Hướng dẫn đặt tour</a></li>
-                        <li><a href="/chinh-sach-thay-doi-va-hoan-huy" title="Chính sách thay đổi và hoàn hủy" class="d-block py-2">Chính sách thay đổi và hoàn hủy</a></li>
-                        <li><a href="https://goodmorningtravel.vn/gioi-thieu" title="Giới thiệu về Goodmorning Travel" class="d-block py-2">Giới thiệu về Goodmorning Travel</a></li>
-                        <li><a href="https://goodmorningtravel.vn/apps/affiliate-v2" title="Đăng ký đối tác Affiliate" class="d-block py-2">Đăng ký đối tác Affiliate</a></li>
-                        <li><a href="/dieu-khoan-va-dieu-kien" title="Điều khoản và điều kiện" class="d-block py-2">Điều khoản và điều kiện</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright d-md-flex align-items-center py-3" bis_skin_checked="1">
-                © Bản quyền thuộc về CÔNG TY CỔ PHẦN DU LỊCH CHÀO NGÀY MỚI
-            </div>
-        </div>
-    </footer>
+    <my-footer></my-footer>
 </body>
 
 </html>
