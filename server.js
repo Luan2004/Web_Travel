@@ -228,18 +228,22 @@ app.get('/user', async(req, res) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
         db.get(`SELECT id, username, email FROM Users WHERE id = ?`, [decoded.id], (err, user) => {
             if (err) {
                 return res.status(500).json({ error: err.message });
             }
+            if (!user) {
+                return res.status(404).json({ error: "User không tồn tại!" });
+            }
             res.json(user);
         });
     } catch (err) {
-        console.error('❌ Lỗi xác thực:', err);
-        res.status(403).json({ error: 'Token không hợp lệ!' });
+        console.error('❌ Lỗi xác thực token:', err);
+        res.status(403).json({ error: 'Token không hợp lệ hoặc hết hạn!' });
     }
 });
+
 
 // 🟢 Chạy server
 app.listen(PORT, () => {

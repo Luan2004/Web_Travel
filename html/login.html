@@ -28,6 +28,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H3m13 0a4 4 0 100-8 4 4 0 000 8zm0 0a4 4 0 110 8 4 4 0 010-8z" />
                         </svg>
                     </div>
+                    <p id="email-error" class="text-red-500 text-sm mt-1 hidden"></p> <!-- Thêm dòng này để hiển thị lỗi email -->
                 </div>
 
                 <!-- Password Input -->
@@ -39,6 +40,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 12h16m-7 4h7" />
                         </svg>
                     </div>
+                    <p id="password-error" class="text-red-500 text-sm mt-1 hidden"></p> <!-- Thêm dòng này để hiển thị lỗi mật khẩu -->
                 </div>
 
                 <!-- Login Button -->
@@ -67,8 +69,6 @@
                 <a href="register.html" class="text-blue-600 font-semibold hover:underline">Đăng ký ngay</a>
             </p>
         </div>
-
-        <p id="login-message"></p>
 
         <!-- GOOGLE LOGIN SCRIPT -->
         <script>
@@ -107,6 +107,60 @@
                     callback: handleCredentialResponse
                 });
             };
+        </script>
+
+        <!-- Logic nút login -->
+        <script>
+            document.getElementById("loginForm").addEventListener("submit", function(event) {
+                event.preventDefault(); // Ngăn chặn tải lại trang
+        
+                const emailInput = document.getElementById("login-email");
+                const passwordInput = document.getElementById("login-password");
+                const emailError = document.getElementById("email-error");
+                const passwordError = document.getElementById("password-error");
+        
+                // Xóa thông báo lỗi cũ
+                emailError.textContent = "";
+                passwordError.textContent = "";
+                emailError.classList.add("hidden");
+                passwordError.classList.add("hidden");
+                emailInput.classList.remove("border-red-500");
+                passwordInput.classList.remove("border-red-500");
+        
+                fetch("http://localhost:5000/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: emailInput.value,
+                        password: passwordInput.value
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        if (data.error.includes("Email")) {
+                            emailError.textContent = data.error; // Hiển thị lỗi email
+                            emailError.classList.remove("hidden");
+                            emailInput.classList.add("border-red-500");
+                        } 
+                        if (data.error.includes("Mật khẩu") || data.error.includes("Sai mật khẩu")) {
+                            passwordError.textContent = data.error; // Hiển thị lỗi mật khẩu
+                            passwordError.classList.remove("hidden");
+                            passwordInput.classList.add("border-red-500");
+                        }
+                    } else {
+                        localStorage.setItem("token", data.token); // Lưu token vào localStorage
+                        window.location.href = "home.html"; // Chuyển hướng về trang chủ
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi đăng nhập:", error);
+                    emailError.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
+                    emailError.classList.remove("hidden");
+                });
+            });
         </script>
     </main>
 

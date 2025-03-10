@@ -168,7 +168,10 @@
 
     <main class="max-w-5xl mx-auto mt-6 grid md:grid-cols-2 gap-6">
         <!-- Form thông tin khách du lịch -->
-        <section class="w-full max-w-none p-6 mx-auto">
+        <section class="w-full max-w-none p-6 mx-auto space-y-4">
+            <a class="flex justify-center" href="home.html">
+                <img src="img/logo.png" class="h-12 md:h-14 lg:h-24 w-32">
+            </a>
             <h2 class="text-lg font-semibold mb-4">Thông tin khách du lịch</h2>
             <form id="booking-form" class="space-y-4">
                 <input type="email" id="email" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Email" required>
@@ -214,8 +217,8 @@
                 </button>
             </form>
         </section>
-        
-        <!-- Logic nút Tieeos tục thanh toán -->
+
+        <!-- Logic nút Tiếp tục thanh toán -->
         <script>
             document.addEventListener("DOMContentLoaded", function() {
                 const bookingForm = document.getElementById("booking-form");
@@ -371,6 +374,40 @@
             });
         </script>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const token = localStorage.getItem("token"); // Lấy token đăng nhập
+                
+                if (token) {
+                    fetch("http://localhost:5000/user", { // Đúng API trong server.js
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Không thể lấy thông tin người dùng");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Dữ liệu người dùng:", data); // Debug để kiểm tra
+                
+                        if (data.email) {
+                            document.getElementById("email").value = data.email;
+                        }
+                        if (data.username) {
+                            document.getElementById("username").value = data.username;
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Lỗi tải thông tin user:", error);
+                    });
+                }
+            });
+        </script>        
     </main>
 
     <!-- Gợi ý địa chỉ -->
