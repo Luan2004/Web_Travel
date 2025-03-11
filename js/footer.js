@@ -1,7 +1,7 @@
 class MyFooter extends HTMLElement {
     connectedCallback() {
         this.innerHTML = `
-            <footer class="footer lazyload_bg loaded" data-src="//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107" style="background-image: url(&quot;//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107&quot;);">
+            <footer class="md:px-40 footer lazyload_bg loaded" data-src="//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107" style="background-image: url(&quot;//bizweb.dktcdn.net/100/342/038/themes/938346/assets/bg_footer.png?1736742206107&quot;);">
                 <div class="container px-6" bis_skin_checked="1">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="col-12 col-md-6 col-lg-3 col-footer col-info" bis_skin_checked="1">

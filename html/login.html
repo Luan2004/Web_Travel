@@ -21,7 +21,6 @@
             <form id="loginForm" class="space-y-4">
                 <!-- Email Input -->
                 <div class="space-y-1">
-                    <label for="login-email" class="block text-sm font-medium text-gray-700">Email</label>
                     <div class="relative">
                         <input type="email" id="login-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pl-10" placeholder="Nhập email" required>
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -33,7 +32,6 @@
 
                 <!-- Password Input -->
                 <div class="space-y-1">
-                    <label for="login-password" class="block text-sm font-medium text-gray-700">Mật Khẩu</label>
                     <div class="relative">
                         <input type="password" id="login-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pl-10" placeholder="Nhập mật khẩu" required>
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,6 +66,23 @@
                 Bạn chưa có tài khoản?
                 <a href="register.html" class="text-blue-600 font-semibold hover:underline">Đăng ký ngay</a>
             </p>
+            <p class="text-center text-gray-600 hover:text-blue-700 mt-4" id="forgot-password-link">Quên mật khẩu</p>
+            <!-- Form lấy lại mật khẩu, mặc định ẩn -->
+            <div id="forgot-password-form" class="hidden mt-4">
+                <div class="space-y-4">
+                    <!-- Email Input for Forgot Password -->
+                    <div class="space-y-1">
+                        <div class="relative">
+                            <input type="email" id="forgot-password-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pl-10" placeholder="Nhập email" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Button to Send Password Reset Request -->
+                    <button type="button" id="reset-password-button" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                        Lấy lại mật khẩu
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- GOOGLE LOGIN SCRIPT -->
@@ -160,6 +175,46 @@
                     emailError.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
                     emailError.classList.remove("hidden");
                 });
+            });
+        </script>
+
+        <!-- Quên mật khẩu -->
+        <script>
+                // Biến để theo dõi trạng thái của form (hiện hay ẩn)
+            let isFormVisible = false;
+
+            document.getElementById("forgot-password-link").addEventListener("click", function() {
+                const forgotPasswordForm = document.getElementById("forgot-password-form");
+
+                // Kiểm tra trạng thái hiện tại của form
+                if (isFormVisible) {
+                    // Nếu form đang hiển thị, ẩn form
+                    forgotPasswordForm.classList.add("hidden");
+                } else {
+                    // Nếu form đang ẩn, hiển thị form
+                    forgotPasswordForm.classList.remove("hidden");
+                }
+
+                // Đổi trạng thái form
+                isFormVisible = !isFormVisible;
+            });
+
+            // Lắng nghe sự kiện khi nhấn vào nút "Lấy lại mật khẩu"
+            document.getElementById("reset-password-button").addEventListener("click", function() {
+                const email = document.getElementById("forgot-password-email").value;
+                
+                if (email) {
+                    // Thực hiện gửi yêu cầu lấy lại mật khẩu (sử dụng fetch hoặc bất kỳ phương thức nào khác)
+                    console.log("Gửi yêu cầu lấy lại mật khẩu cho email:", email);
+                    
+                    // Ẩn form lấy lại mật khẩu và quay lại form đăng nhập
+                    document.getElementById("forgot-password-form").classList.add("hidden");
+                    document.getElementById("loginForm").classList.remove("hidden");
+                    
+                    alert("Một email lấy lại mật khẩu đã được gửi!");
+                } else {
+                    alert("Vui lòng nhập email!");
+                }
             });
         </script>
     </main>

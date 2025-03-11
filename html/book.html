@@ -52,26 +52,27 @@
         ul li:hover {
             background: #f1f1f13c;
         }
-        /* Tạo đường kẻ ngăn cách giữa 2 phần */
+        
         
         .separator {
             border-left: 2px solid #dddddd5b;
+            /* Tạo đường kẻ ngăn cách giữa 2 phần */
         }
         
         .ke {
             border-bottom: 2px solid #dddddd5b;
         }
-        /* Đảm bảo input và button nằm ngang và cùng chiều cao*/
+        
         
         .flex {
             display: flex;
             align-items: center;
             height: 40px;
+            /* Đảm bảo input và button nằm ngang và cùng chiều cao*/
         }
-        /* Đảm bảo input và button nằm ngang đúng */
         
         .container {
-            max-width: 80vw;
+            max-width: 100%;
             /* Mở rộng form rộng 80% màn hình */
             margin: 0 auto;
         }
@@ -142,11 +143,6 @@
 </head>
 
 <body>
-    <nav class="text-center py-3 bg-gray-200">
-        <a href="home.html" class="text-blue-600">Trang chủ</a> >
-        <a id="back-to-tour" class="text-blue-600">Xem Tour</a>
-    </nav>
-
     <!-- Quay lại tour -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -165,19 +161,21 @@
         });
     </script>
 
-
-    <main class="max-w-5xl mx-auto mt-6 grid md:grid-cols-2 gap-6">
+    <main class="mt-6 grid md:grid-cols-2 gap-6 md:px-40">
         <!-- Form thông tin khách du lịch -->
-        <section class="w-full max-w-none p-6 mx-auto space-y-4">
+        <section style="width:600px;" class="p-6 space-y-4">
             <a class="flex justify-center" href="home.html">
                 <img src="img/logo.png" class="h-12 md:h-14 lg:h-24 w-32">
             </a>
+            <nav class="text-left py-3">
+                <a href="home.html" class="text-gray-600 hover:text-blue-700">Trang chủ</a> >
+                <a id="back-to-tour" class="text-gray-600 hover:text-blue-700">Xem tour</a> >
+                <a class="text-black">Đặt tour</a>
+            </nav>
             <h2 class="text-lg font-semibold mb-4">Thông tin khách du lịch</h2>
             <form id="booking-form" class="space-y-4">
                 <input type="email" id="email" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Email" required>
-
                 <input type="text" id="username" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Họ và tên" required>
-
                 <input type="tel" id="phone" placeholder="Số điện thoại" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" required>
 
                 <div class="grid grid-cols-3 gap-4">
@@ -217,6 +215,53 @@
                 </button>
             </form>
         </section>
+
+        <!-- Form bên phải: Đơn hàng -->
+        <section class="p-6 separator">
+            <h2 class="text-lg font-semibold mb-4">Đặt chỗ</h2>
+            <div class="flex items-center space-x-4">
+                <img id="tour-image" alt="Tour Image" class="w-16 h-16 rounded">
+                <div>
+                    <p id="tour-name" class="font-semibold"></p>
+                    <p class="text-sm text-gray-600">Người lớn: <span id="adult-count-display"></span></p>
+                    <p class="text-sm text-gray-600">Trẻ em: <span id="child-count-display"></span></p>
+                    <p class="text-sm text-gray-600">Ngày đi: <span id="tour-date"></span></p>
+                </div>
+            </div>
+
+            <div class="mt-4 flex items-center mt-8">
+                <input type="text" id="coupon-code" placeholder="Nhập mã giảm giá" class="flex-1 p-2 border border-gray-300 rounded-md h-10 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button id="apply-coupon" class="ml-2 px-4 bg-blue-600 text-white rounded-md h-10 hover:bg-blue-700 transition">
+                    Áp dụng
+                </button>
+            </div>
+            <p id="coupon-error" class="text-red-600 text-sm mt-1 hidden">Mã khuyến mãi không hợp lệ</p>
+
+            <div class="mt-4 border-t pt-4">
+                <p class="flex justify-between"><span>Tạm tính</span> <span id="subtotal-price">750.000đ</span></p>
+                <p class="flex focus:ring-2 focus:ring-blue-500 focus:outline-none justify-between font-bold text-lg"><span>Tổng cộng</span> <span id="total-price" class="text-blue-600">750.000đ</span></p>
+            </div>
+        </section>
+
+        <!-- Button giảm giá -->
+        <script>
+            document.getElementById("apply-coupon").addEventListener("click", function() {
+                const couponInput = document.getElementById("coupon-code");
+                const errorMessage = document.getElementById("coupon-error");
+
+                // Danh sách mã giảm giá hợp lệ
+                const validCoupons = ["DISCOUNT10", "SUMMER20", "SALE30"];
+
+                if (!validCoupons.includes(couponInput.value.trim().toUpperCase())) {
+                    couponInput.parentElement.classList.add("border-red-500");
+                    errorMessage.classList.remove("hidden");
+                } else {
+                    couponInput.parentElement.classList.remove("border-red-500");
+                    errorMessage.classList.add("hidden");
+                    alert("Mã giảm giá hợp lệ!");
+                }
+            });
+        </script>
 
         <!-- Logic nút Tiếp tục thanh toán -->
         <script>
@@ -285,53 +330,6 @@
             });
         </script>
 
-        <!-- Form bên phải: Đơn hàng -->
-        <section class="p-6 separator">
-            <h2 class="text-lg font-semibold mb-4">Đặt chỗ</h2>
-            <div class="flex items-center space-x-4">
-                <img id="tour-image" alt="Tour Image" class="w-16 h-16 rounded">
-                <div>
-                    <p id="tour-name" class="font-semibold"></p>
-                    <p class="text-sm text-gray-600">Người lớn: <span id="adult-count-display"></span></p>
-                    <p class="text-sm text-gray-600">Trẻ em: <span id="child-count-display"></span></p>
-                    <p class="text-sm text-gray-600">Ngày đi: <span id="tour-date"></span></p>
-                </div>
-            </div>
-
-            <div class="mt-4 flex items-center mt-8">
-                <input type="text" id="coupon-code" placeholder="Nhập mã giảm giá" class="flex-1 p-2 border border-gray-300 rounded-md h-10 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                <button id="apply-coupon" class="ml-2 px-4 bg-blue-600 text-white rounded-md h-10 hover:bg-blue-700 transition">
-                    Áp dụng
-                </button>
-            </div>
-            <p id="coupon-error" class="text-red-600 text-sm mt-1 hidden">Mã khuyến mãi không hợp lệ</p>
-
-            <div class="mt-4 border-t pt-4">
-                <p class="flex justify-between"><span>Tạm tính</span> <span id="subtotal-price">750.000đ</span></p>
-                <p class="flex focus:ring-2 focus:ring-blue-500 focus:outline-none justify-between font-bold text-lg"><span>Tổng cộng</span> <span id="total-price" class="text-blue-600">750.000đ</span></p>
-            </div>
-        </section>
-
-        <!-- Button giảm giá -->
-        <script>
-            document.getElementById("apply-coupon").addEventListener("click", function() {
-                const couponInput = document.getElementById("coupon-code");
-                const errorMessage = document.getElementById("coupon-error");
-
-                // Danh sách mã giảm giá hợp lệ
-                const validCoupons = ["DISCOUNT10", "SUMMER20", "SALE30"];
-
-                if (!validCoupons.includes(couponInput.value.trim().toUpperCase())) {
-                    couponInput.parentElement.classList.add("border-red-500");
-                    errorMessage.classList.remove("hidden");
-                } else {
-                    couponInput.parentElement.classList.remove("border-red-500");
-                    errorMessage.classList.add("hidden");
-                    alert("Mã giảm giá hợp lệ!");
-                }
-            });
-        </script>
-
         <!-- Lấy thông tin tour từ tour-->
         <script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -374,6 +372,7 @@
             });
         </script>
 
+        <!-- Lấy thông tin user -->
         <script>
             document.addEventListener("DOMContentLoaded", function () {
                 const token = localStorage.getItem("token"); // Lấy token đăng nhập

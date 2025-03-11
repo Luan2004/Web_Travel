@@ -4,7 +4,7 @@ class MyHeader extends HTMLElement {
         const isLoggedIn = localStorage.getItem("token"); // Kiểm tra đăng nhập
 
         this.innerHTML = `
-            <header id="main-header" class="top-0 left-0 w-full h-14 px-6 flex justify-between items-center transition-all duration-300 z-50 fixed bg-white text-black shadow-md">
+            <header id="main-header" class="md:px-40 top-0 left-0 w-full h-14 px-6 flex justify-between items-center transition-all duration-300 z-50 fixed bg-white text-black shadow-md">
                 <style>
                     @keyframes shake {
                     0% { transform: rotate(0deg); }
