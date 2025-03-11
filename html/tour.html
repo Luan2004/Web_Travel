@@ -8,23 +8,85 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/header.js" defer></script>
     <script src="/js/footer.js" defer></script>
+    <style>
+        #image-modal {
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        #image-modal.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        /* Thiết kế nút */
+        #prev-image, #next-image, #close-modal {
+            background: rgba(255, 255, 255, 0.9); /* Màu trắng xanh nhạt */
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out, background 0.3s ease-in-out;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* Phóng to nút mà không thay đổi vị trí */
+        #prev-image:hover, #next-image:hover, #close-modal:hover {
+            background: rgba(255, 255, 255, 1); /* Màu sáng hơn khi hover */
+            transform: scale(1.3); /* Phóng to nhưng không di chuyển */
+        }
+        
+        /* Giữ vị trí cố định */
+        #prev-image {
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        #next-image {
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        #close-modal {
+            top: 10px;
+            right: 10px;
+        }
+        
+        /* Kích thước icon */
+        #prev-image svg, #next-image svg, #close-modal svg {
+            color: #2563EB; /* Màu xanh */
+            width: 24px;
+            height: 24px;
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        /* Khi hover chỉ icon phóng to nhẹ */
+        #prev-image:hover svg, #next-image:hover svg, #close-modal:hover svg {
+            transform: scale(1.2);
+        }        
+    </style>
 </head>
 
-<body class="bg-gray-100">
+<body >
     <!-- Gọi header -->
     <my-header></my-header>
 
     <main class="container mx-auto p-5">
-        <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg ">
             <!-- Tiêu đề -->
-            <h3 id="tour-title" class="text-xl font-semibold mb-4"></h3>
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- Phần trái: Hình ảnh & mô tả -->
                 <div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <img id="tour-image" class="w-full rounded-lg mb-4">
-                        <img id="tour-image2" class="w-full h-24 object-cover rounded-lg">
-                        <img id="tour-image3" class="w-full h-24 object-cover rounded-lg">
+                    <div class="grid grid-cols-2 gap-2" style="width: 800px;">
+                        <img id="tour-image"  class="w-128 h-full rounded-lg mb-4">
+                        <div class="space-y-2">
+                            <img id="tour-image2" class="w-36 h-40 object-cover rounded-lg">
+                            <img id="tour-image3" class="w-36 h-40 object-cover rounded-lg">
+                        </div>
                     </div>
                     <p class="mt-4 flex items-center">
                         <a href="#" class="text-blue-600 hover:underline ml-1">Thêm vào yêu thích</a>
@@ -35,7 +97,7 @@
                 </div>
                 <!-- Phần phải: Giá và đặt vé -->
                 <div class="bg-gray-50 p-6 rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold" id="tour-name"></h3>
+                    <h3 id="tour-title" class="text-xl font-semibold mb-4"></h3>
                     <p class="mt-2 text-gray-500 line-through" id="tour-old-price"></p>
                     <p class="text-red-600 text-2xl font-bold flex items-center justify-between">
                         <span id="tour-price"></span>
@@ -72,6 +134,32 @@
                 </div>
             </div>
         </div>
+
+       <!-- Modal hiển thị ảnh phóng to -->
+    <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center hidden z-50">
+        <!-- Nút đóng (X) -->
+        <button id="close-modal" class="absolute top-10 right-10 flex justify-center items-center w-12 h-12 bg-white rounded-full shadow-lg">
+            <svg class="w-6 h-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <!-- Mũi tên trái -->
+        <button id="prev-image" class="absolute top-10 right-10 flex justify-center items-center w-12 h-12 bg-white rounded-full shadow-lg">
+            <svg class="w-6 h-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+
+        <img id="modal-image" class="max-w-[80vw] max-h-[80vh] rounded-lg shadow-lg">
+
+        <!-- Mũi tên phải -->
+        <button id="next-image" class="absolute right-10 top-1/2 transform -translate-y-1/2 flex justify-center items-center w-12 h-12 bg-white rounded-full shadow-lg">
+            <svg class="w-6 h-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+        </button>
+    </div>
 
         <!-- Lấy thông tin và hiển thị tour được click -->
         <script>
@@ -199,6 +287,72 @@
             });
         </script>
 
+        <!-- Event click vào ảnh -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const images = [
+                    document.getElementById("tour-image"),
+                    document.getElementById("tour-image2"),
+                    document.getElementById("tour-image3")
+                ];
+                let currentIndex = 0;
+        
+                const modal = document.getElementById("image-modal");
+                const modalImage = document.getElementById("modal-image");
+                const closeModal = document.getElementById("close-modal");
+                const prevButton = document.getElementById("prev-image");
+                const nextButton = document.getElementById("next-image");
+        
+                // Hiển thị ảnh phóng to
+                function showImage(index) {
+                    currentIndex = index;
+                    modalImage.src = images[currentIndex].src;
+                    modal.classList.remove("hidden");
+                }
+        
+                // Sự kiện click vào ảnh nhỏ để mở modal
+                images.forEach((img, index) => {
+                    img.addEventListener("click", () => showImage(index));
+                });
+        
+                // Sự kiện đóng modal
+                closeModal.addEventListener("click", () => {
+                    modal.classList.add("hidden");
+                });
+        
+                // Chuyển ảnh trước
+                prevButton.addEventListener("click", () => {
+                    currentIndex = (currentIndex - 1 + images.length) % images.length;
+                    showImage(currentIndex);
+                });
+        
+                // Chuyển ảnh tiếp theo
+                nextButton.addEventListener("click", () => {
+                    currentIndex = (currentIndex + 1) % images.length;
+                    showImage(currentIndex);
+                });
+        
+                // Đóng modal khi click ngoài ảnh
+                modal.addEventListener("click", (event) => {
+                    if (event.target === modal) {
+                        modal.classList.add("hidden");
+                    }
+                });
+        
+                // Xử lý khi bấm phím trái phải trên bàn phím
+                document.addEventListener("keydown", (event) => {
+                    if (!modal.classList.contains("hidden")) {
+                        if (event.key === "ArrowLeft") {
+                            prevButton.click();
+                        } else if (event.key === "ArrowRight") {
+                            nextButton.click();
+                        } else if (event.key === "Escape") {
+                            closeModal.click();
+                        }
+                    }
+                });
+            });
+        </script>
     </main>
     <!-- Gọi footer -->
     <my-footer></my-footer>

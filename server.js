@@ -200,14 +200,14 @@ app.post('/login', async(req, res) => {
                 console.error('❌ Lỗi truy vấn database:', err);
                 return res.status(500).json({ error: 'Lỗi truy vấn database' });
             }
-            if (!user) {
+        if (!user) {
                 return res.status(401).json({ error: 'Email chưa được đăng ký!' });
-            }
+        }
 
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
                 return res.status(401).json({ error: 'Sai mật khẩu!' });
-            }
+        }
 
             const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET || 'secretkey', { expiresIn: '1h' });
             res.json({ message: 'Đăng nhập thành công!', token });

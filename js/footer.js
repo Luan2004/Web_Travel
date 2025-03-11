@@ -10,7 +10,7 @@ class MyFooter extends HTMLElement {
                                 <span class="d-block mb-1">Tên công ty</span>
                                 <p>CÔNG TY CỔ PHẦN DU LỊCH CHÀO NGÀY MỚI</p>
                                 <span class="d-block mb-1">Địa chỉ</span>
-                                <p>Tổ 2 Trường Sơn, Phường Vĩnh Trường, Thành phố Nha Trang, Tỉnh Khánh Hòa, Việt Nam<br>
+                                <p> Khu TM, 209 Đ. 30 Tháng 4, Xuân Khánh, Ninh Kiều, Cần Thơ<br>
                                     <a href="tel:0902288296" class="d-block" title="0902288296">Hỗ trợ: 0902288296</a>
                                 </p>
                                 <span class="d-block mb-1">Giấy phép kinh doanh lữ hành số:</span>
