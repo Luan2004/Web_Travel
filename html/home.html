@@ -38,6 +38,17 @@
                 opacity: 0.6;
             }
         }        
+        @keyframes scrollBackground {
+            0% { background-position: 0% 50%; }
+            100% { background-position: -300% 50%; }
+        }
+
+        .sliding-background {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            animation: scrollBackground 15s linear infinite;
+        }
     </style>
 </head>
 
@@ -76,7 +87,10 @@
     <my-header></my-header>
 
     <!-- Search -->
-    <section class="relative w-full h-[500px] bg-cover bg-center" style="background-image: url('https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2022/7/13/1067753/Tu-Hao-Vinh-Ha-Long-.jpg');">
+    <section class="relative w-full h-[500px] bg-cover bg-center sliding-background"
+        style="background-image: url('https://images.vietnamtourism.gov.vn/vn//images/2023/thang_4/crop_lang_chai_cua_van_quang_ninh_1477234829-1.jpg'),
+              url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQU9ZiDsSq0774z1In64Q_0VOIRCElckZ0tEg&s'),
+              url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLMbfcz50UBwcLO9TZEI4sEbSu-sgIioHFVw&s');">
         <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white space-y-4">
             <h2 class="text-4xl text-center font-bold mb-2 mt-[-150px]">Khám phá Việt Nam tuyệt vời</h2>
             <div class="relative text-center">
@@ -85,7 +99,6 @@
                 <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14zm7 7h.01M21 21l-6-6"></path>
                 </svg>
-                <!-- Biểu tượng micro -->
                 <button id="voiceSearch" class="absolute right-3 top-1/2 transform -translate-y-1/2 w-6 h-6 text-gray-600 transition-all duration-300">
                     <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3zm6-3v1a6 6 0 01-12 0v-1m12 0a6 6 0 01-12 0m12 0V9m-12 0v2"></path>
