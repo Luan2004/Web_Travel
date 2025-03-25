@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/header.js" defer></script>
     <script src="/js/footer.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         #micWave {
             position: absolute;
@@ -17,11 +19,11 @@
             border-radius: 50%;
             opacity: 0;
             transform: scale(1);
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            transition: opacity 2s ease-in-out, transform 0.3s ease-in-out;
         }
         
         .animate-pulse {
-            animation: pulseEffect 1s infinite;
+            animation: pulseEffect 0.2s infinite;
         }
         
         @keyframes pulseEffect {
@@ -38,16 +40,17 @@
                 opacity: 0.6;
             }
         }        
-        @keyframes scrollBackground {
-            0% { background-position: 0% 50%; }
-            100% { background-position: -300% 50%; }
+        .carousel-inner {
+            display: flex;
         }
-
-        .sliding-background {
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            animation: scrollBackground 15s linear infinite;
+        .carousel-item {
+            flex: 0 0 100%;
+            transition: transform 3s ease-in-out, opacity 1s ease-in-out;
+        }
+        .carousel-item img {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -87,14 +90,30 @@
     <my-header></my-header>
 
     <!-- Search -->
-    <section class="relative w-full h-[500px] bg-cover bg-center sliding-background"
-        style="background-image: url('https://images.vietnamtourism.gov.vn/vn//images/2023/thang_4/crop_lang_chai_cua_van_quang_ninh_1477234829-1.jpg'),
-              url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQU9ZiDsSq0774z1In64Q_0VOIRCElckZ0tEg&s'),
-              url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLMbfcz50UBwcLO9TZEI4sEbSu-sgIioHFVw&s');">
+    <section class="relative w-full h-[500px]">
+        <div id="carouselExample" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://images.vietnamtourism.gov.vn/vn//images/2023/thang_4/crop_lang_chai_cua_van_quang_ninh_1477234829-1.jpg" alt="Hình 1">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://danangfantasticity.com/wp-content/uploads/2024/03/thang-3-tri-an-du-khach-quang-da-voi-uu-dai-den-50-tu-sun-world-ba-na-hills-va-mercure-danang-01.jpg" alt="Hình 2">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://suntravelgroup.vn/media/5012/cau-rong-da-nang.jpeg?width=1300&height=720&mode=crop" alt="Hình 3">
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+        </div>
         <div class="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white space-y-4">
             <h2 class="text-4xl text-center font-bold mb-2 mt-[-150px]">Khám phá Việt Nam tuyệt vời</h2>
             <div class="relative text-center">
-                <input id="searchInput" type="text" placeholder="Tìm kiếm tour..." class="px-4 py-2 w-[400px] text-black rounded-lg pl-10">
+                <input id="searchInput" type="text" placeholder=" Tìm kiếm tour..." class="ml-2 px-4 py-2 w-[400px] text-black rounded-lg pl-10">
                 <ul id="suggestions" class="absolute w-full bg-white text-black rounded-lg shadow-md hidden"></ul>
                 <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a7 7 0 100 14 7 7 0 000-14zm7 7h.01M21 21l-6-6"></path>
@@ -263,7 +282,7 @@
     <!-- Danh sách tours -->
     <section class="py-10 px-6">
         <h2 id="hot-tour" class="text-3xl font-bold text-center mb-6">Tour nổi bật</h2>
-        <div id="tour-list" class="grid grid-cols-1 md:grid-cols-3 gap-6 md:px-40"></div>
+        <div id="tour-list" class="grid grid-cols-4 md:grid-cols1 gap-6 md:px-20"></div>
     </section>
 
     <!-- Click vào tour -->

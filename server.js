@@ -244,6 +244,55 @@ app.get('/user', async(req, res) => {
     }
 });
 
+// 🟢 API Đổi mật khẩu
+app.post('/change-password', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    const { oldPassword, newPassword } = req.body;
+
+    // Kiểm tra token
+    if (!token) {
+        return res.status(401).json({ error: 'Không có token!' });
+    }
+
+    try {
+        // Xác thực token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+        const userId = decoded.id;
+
+        // Lấy thông tin người dùng từ database
+        db.get(`SELECT * FROM Users WHERE id = ?`, [userId], async (err, user) => {
+            if (err) {
+                console.error('❌ Lỗi truy vấn database:', err);
+                return res.status(500).json({ error: 'Lỗi truy vấn database!' });
+            }
+            if (!user) {
+                return res.status(404).json({ error: 'Người dùng không tồn tại!' });
+            }
+
+            // Kiểm tra mật khẩu cũ
+            const isMatch = await bcrypt.compare(oldPassword, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ error: 'Mật khẩu cũ không đúng!' });
+            }
+
+            // Mã hóa mật khẩu mới
+            const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+            // Cập nhật mật khẩu mới vào database
+            db.run(`UPDATE Users SET password = ? WHERE id = ?`, [hashedNewPassword, userId], (updateErr) => {
+                if (updateErr) {
+                    console.error('❌ Lỗi cập nhật mật khẩu:', updateErr);
+                    return res.status(500).json({ error: 'Lỗi khi cập nhật mật khẩu!' });
+                }
+                res.status(200).json({ message: 'Đổi mật khẩu thành công!' });
+            });
+        });
+    } catch (err) {
+        console.error('❌ Lỗi xác thực token:', err);
+        res.status(403).json({ error: 'Token không hợp lệ hoặc hết hạn!' });
+    }
+});
 
 // 🟢 Chạy server
 app.listen(PORT, () => {

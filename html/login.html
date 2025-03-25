@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Nhập</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/header.js" defer></script>
     <script src="/js/footer.js" defer></script>
@@ -27,7 +28,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H3m13 0a4 4 0 100-8 4 4 0 000 8zm0 0a4 4 0 110 8 4 4 0 010-8z" />
                         </svg>
                     </div>
-                    <p id="email-error" class="text-red-500 text-sm mt-1 hidden"></p> <!-- Thêm dòng này để hiển thị lỗi email -->
+                    <p id="email-error" class="text-red-500 text-sm mt-1 hidden"></p>
                 </div>
 
                 <!-- Password Input -->
@@ -38,7 +39,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 12h16m-7 4h7" />
                         </svg>
                     </div>
-                    <p id="password-error" class="text-red-500 text-sm mt-1 hidden"></p> <!-- Thêm dòng này để hiển thị lỗi mật khẩu -->
+                    <p id="password-error" class="text-red-500 text-sm mt-1 hidden"></p>
                 </div>
 
                 <!-- Login Button -->
@@ -67,17 +68,15 @@
                 <a href="register.html" class="text-blue-600 font-semibold hover:underline">Đăng ký ngay</a>
             </p>
             <p class="text-center text-gray-600 hover:text-blue-700 mt-4" id="forgot-password-link">Quên mật khẩu</p>
+
             <!-- Form lấy lại mật khẩu, mặc định ẩn -->
             <div id="forgot-password-form" class="hidden mt-4">
                 <div class="space-y-4">
-                    <!-- Email Input for Forgot Password -->
                     <div class="space-y-1">
                         <div class="relative">
                             <input type="email" id="forgot-password-email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none pl-10" placeholder="Nhập email" required>
                         </div>
                     </div>
-                    
-                    <!-- Button to Send Password Reset Request -->
                     <button type="button" id="reset-password-button" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
                         Lấy lại mật khẩu
                     </button>
@@ -85,142 +84,155 @@
             </div>
         </div>
 
-        <!-- GOOGLE LOGIN SCRIPT -->
-        <script>
-            document.getElementById("googleLogin").addEventListener("click", function() {
-                google.accounts.id.prompt();
-            });
-
-            function handleCredentialResponse(response) {
-                const responsePayload = JSON.parse(atob(response.credential.split(".")[1]));
-
-                fetch("http://localhost:5000/login-google", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            email: responsePayload.email
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.token) {
-                            alert("Đăng nhập thành công!");
-                            localStorage.setItem("token", data.token);
-                            window.location.href = "home.html";
-                        } else {
-                            alert("Đăng nhập thất bại: " + data.error);
-                        }
-                    })
-                    .catch(error => console.error("Lỗi đăng nhập Google:", error));
-            }
-
-            window.onload = function() {
-                google.accounts.id.initialize({
-                    client_id: "YOUR_GOOGLE_CLIENT_ID", // Thay bằng Client ID thực tế
-                    callback: handleCredentialResponse
-                });
-            };
-        </script>
-
-        <!-- Logic nút login -->
-        <script>
-            document.getElementById("loginForm").addEventListener("submit", function(event) {
-                event.preventDefault(); // Ngăn chặn tải lại trang
-        
-                const emailInput = document.getElementById("login-email");
-                const passwordInput = document.getElementById("login-password");
-                const emailError = document.getElementById("email-error");
-                const passwordError = document.getElementById("password-error");
-        
-                // Xóa thông báo lỗi cũ
-                emailError.textContent = "";
-                passwordError.textContent = "";
-                emailError.classList.add("hidden");
-                passwordError.classList.add("hidden");
-                emailInput.classList.remove("border-red-500");
-                passwordInput.classList.remove("border-red-500");
-        
-                fetch("http://localhost:5000/login", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        email: emailInput.value,
-                        password: passwordInput.value
-                    })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.error) {
-                        if (data.error.includes("Email")) {
-                            emailError.textContent = data.error; // Hiển thị lỗi email
-                            emailError.classList.remove("hidden");
-                            emailInput.classList.add("border-red-500");
-                        } 
-                        if (data.error.includes("Mật khẩu") || data.error.includes("Sai mật khẩu")) {
-                            passwordError.textContent = data.error; // Hiển thị lỗi mật khẩu
-                            passwordError.classList.remove("hidden");
-                            passwordInput.classList.add("border-red-500");
-                        }
-                    } else {
-                        localStorage.setItem("token", data.token); // Lưu token vào localStorage
-                        window.location.href = "home.html"; // Chuyển hướng về trang chủ
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi đăng nhập:", error);
-                    emailError.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
-                    emailError.classList.remove("hidden");
-                });
-            });
-        </script>
-
-        <!-- Quên mật khẩu -->
-        <script>
-                // Biến để theo dõi trạng thái của form (hiện hay ẩn)
-            let isFormVisible = false;
-
-            document.getElementById("forgot-password-link").addEventListener("click", function() {
-                const forgotPasswordForm = document.getElementById("forgot-password-form");
-
-                // Kiểm tra trạng thái hiện tại của form
-                if (isFormVisible) {
-                    // Nếu form đang hiển thị, ẩn form
-                    forgotPasswordForm.classList.add("hidden");
-                } else {
-                    // Nếu form đang ẩn, hiển thị form
-                    forgotPasswordForm.classList.remove("hidden");
-                }
-
-                // Đổi trạng thái form
-                isFormVisible = !isFormVisible;
-            });
-
-            // Lắng nghe sự kiện khi nhấn vào nút "Lấy lại mật khẩu"
-            document.getElementById("reset-password-button").addEventListener("click", function() {
-                const email = document.getElementById("forgot-password-email").value;
-                
-                if (email) {
-                    // Thực hiện gửi yêu cầu lấy lại mật khẩu (sử dụng fetch hoặc bất kỳ phương thức nào khác)
-                    console.log("Gửi yêu cầu lấy lại mật khẩu cho email:", email);
-                    
-                    // Ẩn form lấy lại mật khẩu và quay lại form đăng nhập
-                    document.getElementById("forgot-password-form").classList.add("hidden");
-                    document.getElementById("loginForm").classList.remove("hidden");
-                    
-                    alert("Một email lấy lại mật khẩu đã được gửi!");
-                } else {
-                    alert("Vui lòng nhập email!");
-                }
-            });
-        </script>
+        <!-- Modal thành công -->
+        <div id="successModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Đăng nhập thành công!</h3>
+                <button id="closeSuccessModal" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+                    OK
+                </button>
+            </div>
+        </div>
     </main>
 
     <!-- Gọi footer -->
     <my-footer></my-footer>
+
+    <!-- GOOGLE LOGIN SCRIPT -->
+    <script>
+        document.getElementById("googleLogin").addEventListener("click", function() {
+            google.accounts.id.prompt();
+        });
+
+        function handleCredentialResponse(response) {
+            // Giải mã JWT của Google để lấy thông tin người dùng
+            const responsePayload = JSON.parse(atob(response.credential.split(".")[1]));
+
+            fetch("http://localhost:5000/google-auth", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: responsePayload.email,
+                    googleId: responsePayload.sub
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.token) {
+                    alert("Đăng nhập thành công!");
+                    localStorage.setItem("token", data.token);
+                    window.location.href = "home.html";
+                } else {
+                    alert("Đăng nhập thất bại: " + data.error);
+                }
+            })
+            .catch(error => console.error("Lỗi đăng nhập Google:", error));
+        }
+
+        window.onload = function() {
+            google.accounts.id.initialize({
+                client_id: "117404146592-0p3leqbrblnuoilrmndvael35t6gmbop.apps.googleusercontent.com", // Thay bằng Client ID thực tế
+                callback: handleCredentialResponse
+            });
+        };
+    </script>
+
+    <!-- Logic nút login -->
+    <script>
+        const successModal = document.getElementById("successModal");
+        const closeSuccessModal = document.getElementById("closeSuccessModal");
+
+        // Đóng modal và chuyển hướng
+        closeSuccessModal.addEventListener("click", function() {
+            successModal.classList.add("hidden");
+            window.location.href = "home.html";
+        });
+
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const emailInput = document.getElementById("login-email");
+            const passwordInput = document.getElementById("login-password");
+            const emailError = document.getElementById("email-error");
+            const passwordError = document.getElementById("password-error");
+
+            // Xóa thông báo lỗi cũ
+            emailError.textContent = "";
+            passwordError.textContent = "";
+            emailError.classList.add("hidden");
+            passwordError.classList.add("hidden");
+            emailInput.classList.remove("border-red-500");
+            passwordInput.classList.remove("border-red-500");
+
+            fetch("http://localhost:5000/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: emailInput.value,
+                    password: passwordInput.value
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    if (data.error.includes("Email")) {
+                        emailError.textContent = data.error;
+                        emailError.classList.remove("hidden");
+                        emailInput.classList.add("border-red-500");
+                    } 
+                    if (data.error.includes("Mật khẩu") || data.error.includes("Sai mật khẩu")) {
+                        passwordError.textContent = data.error;
+                        passwordError.classList.remove("hidden");
+                        passwordInput.classList.add("border-red-500");
+                    }
+                } else {
+                    localStorage.setItem("token", data.token);
+                    successModal.classList.remove("hidden");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi đăng nhập:", error);
+                emailError.textContent = "Có lỗi xảy ra. Vui lòng thử lại.";
+                emailError.classList.remove("hidden");
+            });
+        });
+    </script>
+
+    <!-- Quên mật khẩu -->
+    <script>
+        let isFormVisible = false;
+
+        document.getElementById("forgot-password-link").addEventListener("click", function() {
+            const forgotPasswordForm = document.getElementById("forgot-password-form");
+
+            if (isFormVisible) {
+                forgotPasswordForm.classList.add("hidden");
+            } else {
+                forgotPasswordForm.classList.remove("hidden");
+            }
+
+            isFormVisible = !isFormVisible;
+        });
+
+        document.getElementById("reset-password-button").addEventListener("click", function() {
+            const email = document.getElementById("forgot-password-email").value;
+
+            if (email) {
+                console.log("Gửi yêu cầu lấy lại mật khẩu cho email:", email);
+                document.getElementById("forgot-password-form").classList.add("hidden");
+                alert("Một email lấy lại mật khẩu đã được gửi!");
+                isFormVisible = false;
+            } else {
+                alert("Vui lòng nhập email!");
+            }
+        });
+    </script>
+
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'925822eb5d493dd2',t:'MTc0MjgzOTk0My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 
 </html>

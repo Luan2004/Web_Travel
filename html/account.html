@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang Tài Khoản</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/header.js" defer></script>
+    <script src="/js/footer.js" defer></script>
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <my-header></my-header>
+
+    <!-- Account Section -->
+    <section class="py-10 px-6">
+        <div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 ml-[-20px]">
+                <!-- Left Column -->
+                <div>
+                    <h3 class="text-xl font-semibold mb-2">TRANG TÀI KHOẢN</h3>
+                    <p id="greeting" class="text-lg text-blue-600 mb-2">Xin chào, Nguyễn Vũ Luân!</p>
+                    <p id="account-info-link" class="text-blue-600 mb-2 cursor-pointer">Thông tin tài khoản</p>
+                    <p id="orders-link" class="text-gray-600 mb-2 cursor-pointer">Đơn hàng của bạn</p>
+                    <p id="change-password-link" class="text-gray-600 mb-2 cursor-pointer">Đổi mật khẩu</p>
+                    <p id="address-book-link" class="text-gray-600 mb-2">Sổ địa chỉ (5)</p>
+                </div>
+                <!-- Right Column -->
+                <!-- Account Info -->
+                <div id="account-info">
+                    <h3 class="text-xl font-semibold mb-2">THÔNG TIN TÀI KHOẢN</h3>
+                    <p class="text-gray-600"><span class="font-semibold">Họ tên:</span> <span id="username">Nguyễn Vũ Luân</span></p>
+                    <p class="text-gray-600"><span class="font-semibold">Email:</span> <span id="email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f031a0e015d5f5f5b01081a160a012f08020e0603410c0002">[email&#160;protected]</a></span></p>
+                    <p class="text-gray-600"><span class="font-semibold">Điện thoại:</span> <span id="phone">+843325689257</span></p>
+                    <p class="text-gray-600"><span class="font-semibold">Địa chỉ:</span> <span id="address">Hoanh, Thành phố Long Xuyên, An Giang, Vietnam</span></p>
+                </div>
+                <!-- Orders Table -->
+                <div id="orders" class="hidden">
+                    <h3 class="text-xl font-semibold mb-2">ĐƠN HÀNG CỦA BẠN</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full border-collapse">
+                            <thead>
+                                <tr class="bg-blue-600 text-white">
+                                    <th class="py-2 px-4 text-left">Đơn hàng</th>
+                                    <th class="py-2 px-4 text-left">Ngày</th>
+                                    <th class="py-2 px-4 text-left">Địa chỉ</th>
+                                    <th class="py-2 px-4 text-left">Giá trị đơn hàng</th>
+                                    <th class="py-2 px-4 text-left">TT thanh toán</th>
+                                    <th class="py-2 px-4 text-left">TT vận chuyển</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b">
+                                    <td class="py-2 px-4">BP-18052618</td>
+                                    <td class="py-2 px-4">11/03/2025</td>
+                                    <td class="py-2 px-4"></td>
+                                    <td class="py-2 px-4">750.000đ</td>
+                                    <td class="py-2 px-4">Chưa thanh toán</td>
+                                    <td class="py-2 px-4">Chưa chuyển</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 px-4">BP-18052617</td>
+                                    <td class="py-2 px-4">10/03/2025</td>
+                                    <td class="py-2 px-4"></td>
+                                    <td class="py-2 px-4">9.800.000đ</td>
+                                    <td class="py-2 px-4">Chưa thanh toán</td>
+                                    <td class="py-2 px-4">Chưa chuyển</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 px-4">BP-18052616</td>
+                                    <td class="py-2 px-4">10/03/2025</td>
+                                    <td class="py-2 px-4"></td>
+                                    <td class="py-2 px-4">3.850.000đ</td>
+                                    <td class="py-2 px-4">Chưa thanh toán</td>
+                                    <td class="py-2 px-4">Chưa chuyển</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 px-4">BP-18052615</td>
+                                    <td class="py-2 px-4">10/03/2025</td>
+                                    <td class="py-2 px-4"></td>
+                                    <td class="py-2 px-4">1.700.000đ</td>
+                                    <td class="py-2 px-4">Chưa thanh toán</td>
+                                    <td class="py-2 px-4">Chưa chuyển</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 px-4">BP-18052612</td>
+                                    <td class="py-2 px-4">07/03/2025</td>
+                                    <td class="py-2 px-4"></td>
+                                    <td class="py-2 px-4">3.500.000đ</td>
+                                    <td class="py-2 px-4">Chưa thanh toán</td>
+                                    <td class="py-2 px-4">Chưa chuyển</td>
+                                </tr>
+                                <tr class="border-b">
+                                    <td class="py-2 px-4">BP-18052611</td>
+                                    <td class="py-2 px-4">07/03/2025</td>
+                                    <td class="py-2 px-4"></td>
+                                    <td class="py-2 px-4">4.050.000đ</td>
+                                    <td class="py-2 px-4">Chưa thanh toán</td>
+                                    <td class="py-2 px-4">Chưa chuyển</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Change Password Form (Hidden by default) -->
+                <div id="change-password-form" class="hidden">
+                    <h3 class="text-xl font-semibold mb-2">ĐỔI MẬT KHẨU</h3>
+                    <p class="text-gray-600 mb-4">Để đảm bảo tính bảo mật vui lòng đặt lại mật khẩu với ít nhất 8 ký tự</p>
+                    <form id="passwordForm" class="space-y-4">
+                        <div>
+                            <label for="old-password" class="block text-gray-700 font-semibold">Mật khẩu cũ *</label>
+                            <input type="password" id="old-password" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="" required>
+                            <p id="old-password-error" class="text-red-500 text-sm mt-1 hidden"></p>
+                        </div>
+                        <div>
+                            <label for="new-password" class="block text-gray-700 font-semibold">Mật khẩu mới *</label>
+                            <input type="password" id="new-password" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="" required>
+                            <p id="new-password-error" class="text-red-500 text-sm mt-1 hidden"></p>
+                        </div>
+                        <div>
+                            <label for="confirm-password" class="block text-gray-700 font-semibold">Xác nhận lại mật khẩu *</label>
+                            <input type="password" id="confirm-password" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="" required>
+                            <p id="confirm-password-error" class="text-red-500 text-sm mt-1 hidden"></p>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                            ĐỔI MẬT KHẨU
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <my-footer></my-footer>
+
+    <!-- Script to Fetch User Data and Handle Password Change -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Get the token from localStorage
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                alert("Vui lòng đăng nhập để xem thông tin tài khoản!");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                // Fetch user data from the /user endpoint
+                const response = await fetch("http://localhost:5000/user", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                const userData = await response.json();
+
+                if (response.ok) {
+                    // Update the DOM with user data
+                    document.getElementById("greeting").textContent = `Xin chào, ${userData.username}!`;
+                    document.getElementById("username").textContent = userData.username;
+                    document.getElementById("email").textContent = userData.email;
+                    document.getElementById("phone").textContent = userData.phone || "Chưa cập nhật";
+                    document.getElementById("address").textContent = userData.address || "Chưa cập nhật";
+                } else {
+                    alert(userData.error || "Lỗi khi tải thông tin tài khoản!");
+                    localStorage.removeItem("token");
+                    window.location.href = "login.html";
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải thông tin tài khoản:", error);
+                alert("Đã xảy ra lỗi khi tải thông tin tài khoản!");
+                window.location.href = "login.html";
+            }
+
+            // Get menu links
+            const accountInfoLink = document.getElementById("account-info-link");
+            const ordersLink = document.getElementById("orders-link");
+            const changePasswordLink = document.getElementById("change-password-link");
+            const addressBookLink = document.getElementById("address-book-link");
+
+            const accountInfo = document.getElementById("account-info");
+            const orders = document.getElementById("orders");
+            const changePasswordForm = document.getElementById("change-password-form");
+
+            // Function to reset menu colors
+            const resetMenuColors = () => {
+                accountInfoLink.classList.remove("text-blue-600");
+                ordersLink.classList.remove("text-blue-600");
+                changePasswordLink.classList.remove("text-blue-600");
+                addressBookLink.classList.remove("text-blue-600");
+                accountInfoLink.classList.add("text-gray-600");
+                ordersLink.classList.add("text-gray-600");
+                changePasswordLink.classList.add("text-gray-600");
+                addressBookLink.classList.add("text-gray-600");
+            };
+
+            // Function to hide all sections
+            const hideAllSections = () => {
+                accountInfo.classList.add("hidden");
+                orders.classList.add("hidden");
+                changePasswordForm.classList.add("hidden");
+            };
+
+            // Handle "Thông tin tài khoản" link click
+            accountInfoLink.addEventListener("click", () => {
+                resetMenuColors();
+                accountInfoLink.classList.add("text-blue-600");
+                hideAllSections();
+                accountInfo.classList.remove("hidden");
+            });
+
+            // Handle "Đơn hàng của bạn" link click
+            ordersLink.addEventListener("click", () => {
+                resetMenuColors();
+                ordersLink.classList.add("text-blue-600");
+                hideAllSections();
+                orders.classList.remove("hidden");
+            });
+
+            // Handle "Đổi mật khẩu" link click
+            changePasswordLink.addEventListener("click", () => {
+                resetMenuColors();
+                changePasswordLink.classList.add("text-blue-600");
+                hideAllSections();
+                changePasswordForm.classList.remove("hidden");
+            });
+
+            // Handle password change form submission
+            document.getElementById("passwordForm").addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const oldPassword = document.getElementById("old-password").value;
+                const newPassword = document.getElementById("new-password").value;
+                const confirmPassword = document.getElementById("confirm-password").value;
+
+                const oldPasswordError = document.getElementById("old-password-error");
+                const newPasswordError = document.getElementById("new-password-error");
+                const confirmPasswordError = document.getElementById("confirm-password-error");
+
+                // Reset error messages
+                oldPasswordError.textContent = "";
+                newPasswordError.textContent = "";
+                confirmPasswordError.textContent = "";
+                oldPasswordError.classList.add("hidden");
+                newPasswordError.classList.add("hidden");
+                confirmPasswordError.classList.add("hidden");
+
+                // Client-side validation
+                if (newPassword.length < 8) {
+                    newPasswordError.textContent = "Mật khẩu mới phải có ít nhất 8 ký tự!";
+                    newPasswordError.classList.remove("hidden");
+                    return;
+                }
+
+                if (newPassword !== confirmPassword) {
+                    confirmPasswordError.textContent = "Mật khẩu xác nhận không khớp!";
+                    confirmPasswordError.classList.remove("hidden");
+                    return;
+                }
+
+                try {
+                    // Send request to change password
+                    const response = await fetch("http://localhost:5000/change-password", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            oldPassword: oldPassword,
+                            newPassword: newPassword
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        alert("Đổi mật khẩu thành công!");
+                        // Reset form and show account info again
+                        document.getElementById("passwordForm").reset();
+                        hideAllSections();
+                        accountInfo.classList.remove("hidden");
+                        // Update menu colors after successful password change
+                        resetMenuColors();
+                        accountInfoLink.classList.add("text-blue-600");
+                    } else {
+                        if (result.error.includes("Mật khẩu cũ")) {
+                            oldPasswordError.textContent = result.error;
+                            oldPasswordError.classList.remove("hidden");
+                        } else if (result.error.includes("Token")) {
+                            alert("Phiên đăng nhập hết hạn! Vui lòng đăng nhập lại.");
+                            localStorage.removeItem("token");
+                            window.location.href = "login.html";
+                        } else {
+                            alert(result.error || "Lỗi khi đổi mật khẩu!");
+                        }
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi đổi mật khẩu:", error);
+                    alert("Đã xảy ra lỗi khi đổi mật khẩu! Vui lòng thử lại.");
+                }
+            });
+        });
+    </script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92603f94789d4548',t:'MTc0MjkyNTAwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92604e99cfbfbfe7',t:'MTc0MjkyNTYxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92608a14efa54526',t:'MTc0MjkyODA1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>
