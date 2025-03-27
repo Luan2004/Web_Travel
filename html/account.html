@@ -7,6 +7,63 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/js/header.js" defer></script>
     <script src="/js/footer.js" defer></script>
+    <style>
+        .dropdown-container {
+            position: relative;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+
+        .dropdown.show {
+            display: block;
+        }
+
+        .arrow {
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .arrow.rotate {
+            transform: rotate(180deg);
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        ul li {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        ul li:hover {
+            background: #f1f1f13c;
+        }
+
+        .input-error {
+            border: 1px solid red !important;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+    </style>
 </head>
 <body class="bg-gray-100">
     <!-- Header -->
@@ -21,9 +78,9 @@
                     <h3 class="text-xl font-semibold mb-2">TRANG TÀI KHOẢN</h3>
                     <p id="greeting" class="text-lg text-blue-600 mb-2">Xin chào, Nguyễn Vũ Luân!</p>
                     <p id="account-info-link" class="text-blue-600 mb-2 cursor-pointer">Thông tin tài khoản</p>
-                    <p id="orders-link" class="text-gray-600 mb-2 cursor-pointer">Đơn hàng của bạn</p>
-                    <p id="change-password-link" class="text-gray-600 mb-2 cursor-pointer">Đổi mật khẩu</p>
-                    <p id="address-book-link" class="text-gray-600 mb-2">Sổ địa chỉ (5)</p>
+                    <p id="orders-link" class="text-blue-600 mb-2 cursor-pointer">Đơn hàng của bạn</p>
+                    <p id="change-password-link" class="text-blue-600 mb-2 cursor-pointer">Đổi mật khẩu</p>
+                    <p id="address-book-link" class="text-blue-600 mb-2 cursor-pointer">Sổ địa chỉ</p>
                 </div>
                 <!-- Right Column -->
                 <!-- Account Info -->
@@ -38,7 +95,7 @@
                 <div id="orders" class="hidden">
                     <h3 class="text-xl font-semibold mb-2">ĐƠN HÀNG CỦA BẠN</h3>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full border-collapse">
+                        <table class="w-full border-collapse">
                             <thead>
                                 <tr class="bg-blue-600 text-white">
                                     <th class="py-2 px-4 text-left">Đơn hàng</th>
@@ -127,6 +184,76 @@
                         </button>
                     </form>
                 </div>
+                <!-- Address Book (Hidden by default) -->
+                <div id="address-book" class="hidden">
+                    <h3 class="text-xl font-semibold mb-2">ĐỊA CHỈ CỦA BẠN</h3>
+                    <button id="add-address-btn" class="bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300 mb-4">
+                        Thêm địa chỉ
+                    </button>
+                    <div id="address-form-container" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+                            <h3 class="text-lg font-semibold mb-4">THÊM ĐỊA CHỈ MỚI</h3>
+                            <form id="add-address-form" class="space-y-4">
+                                <!-- Họ tên (ẩn nếu không có dữ liệu) -->
+                                <div id="full-name-field" class="hidden">
+                                    <label for="full-name" class="block text-gray-700 font-semibold">Họ tên</label>
+                                    <input type="text" id="full-name" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" readonly>
+                                </div>
+                                <!-- Số điện thoại (ẩn nếu không có dữ liệu) -->
+                                <div id="phone-field" class="hidden">
+                                    <label for="phone-number" class="block text-gray-700 font-semibold">Số điện thoại</label>
+                                    <input type="tel" id="phone-number" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" readonly>
+                                </div>
+                                <!-- Tỉnh/Thành -->
+                                <div class="dropdown-container">
+                                    <label for="province-input" class="block text-gray-700 font-semibold">Tỉnh/Thành *</label>
+                                    <div class="relative">
+                                        <input type="text" id="province-input" class="w-full p-2 border cursor-pointer rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Chọn tỉnh/thành" readonly required>
+                                        <span class="absolute right-3 top-3 arrow">▼</span>
+                                    </div>
+                                    <div id="province-dropdown" class="dropdown">
+                                        <ul id="province-list" class="p-2"></ul>
+                                    </div>
+                                </div>
+                                <!-- Quận/Huyện -->
+                                <div class="dropdown-container">
+                                    <label for="district-input" class="block text-gray-700 font-semibold">Quận/Huyện *</label>
+                                    <div class="relative">
+                                        <input type="text" id="district-input" class="w-full p-2 border cursor-pointer rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Chọn quận/huyện" readonly required>
+                                        <span class="absolute right-3 top-3 arrow">▼</span>
+                                    </div>
+                                    <div id="district-dropdown" class="dropdown">
+                                        <ul id="district-list" class="p-2"></ul>
+                                    </div>
+                                </div>
+                                <!-- Phường/Xã -->
+                                <div class="dropdown-container">
+                                    <label for="ward-input" class="block text-gray-700 font-semibold">Phường/Xã *</label>
+                                    <div class="relative">
+                                        <input type="text" id="ward-input" class="w-full p-2 border cursor-pointer rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Chọn phường/xã" readonly required>
+                                        <span class="absolute right-3 top-3 arrow">▼</span>
+                                    </div>
+                                    <div id="ward-dropdown" class="dropdown">
+                                        <ul id="ward-list" class="p-2"></ul>
+                                    </div>
+                                </div>
+                                <!-- Checkbox Đặt làm địa chỉ mặc định -->
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="is-default" class="mr-2">
+                                    <label for="is-default" class="text-gray-700">Đặt là địa chỉ mặc định</label>
+                                </div>
+                                <!-- Nút Hủy và Thêm địa chỉ -->
+                                <div class="flex justify-end space-x-2">
+                                    <button type="button" id="cancel-address-btn" class="px-4 py-2 text-gray-600 hover:underline">Hủy</button>
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Thêm địa chỉ</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="address-list" class="space-y-4">
+                        <!-- Danh sách địa chỉ sẽ được thêm động từ JavaScript -->
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -140,13 +267,14 @@
         document.addEventListener("DOMContentLoaded", async () => {
             // Get the token from localStorage
             const token = localStorage.getItem("token");
-
+        
             if (!token) {
                 alert("Vui lòng đăng nhập để xem thông tin tài khoản!");
                 window.location.href = "login.html";
                 return;
             }
-
+        
+            let userData; // Biến để lưu dữ liệu người dùng
             try {
                 // Fetch user data from the /user endpoint
                 const response = await fetch("http://localhost:5000/user", {
@@ -156,9 +284,9 @@
                         "Content-Type": "application/json"
                     }
                 });
-
-                const userData = await response.json();
-
+        
+                userData = await response.json();
+        
                 if (response.ok) {
                     // Update the DOM with user data
                     document.getElementById("greeting").textContent = `Xin chào, ${userData.username}!`;
@@ -166,6 +294,16 @@
                     document.getElementById("email").textContent = userData.email;
                     document.getElementById("phone").textContent = userData.phone || "Chưa cập nhật";
                     document.getElementById("address").textContent = userData.address || "Chưa cập nhật";
+
+                    // Hiển thị họ tên và số điện thoại trong form nếu có
+                    if (userData.username) {
+                        document.getElementById("full-name").value = userData.username;
+                        document.getElementById("full-name-field").classList.remove("hidden");
+                    }
+                    if (userData.phone) {
+                        document.getElementById("phone-number").value = userData.phone;
+                        document.getElementById("phone-field").classList.remove("hidden");
+                    }
                 } else {
                     alert(userData.error || "Lỗi khi tải thông tin tài khoản!");
                     localStorage.removeItem("token");
@@ -186,17 +324,19 @@
             const accountInfo = document.getElementById("account-info");
             const orders = document.getElementById("orders");
             const changePasswordForm = document.getElementById("change-password-form");
+            const addressBook = document.getElementById("address-book");
+
+            // Remove blue color from all links initially except "Thông tin tài khoản"
+            ordersLink.classList.remove("text-blue-600");
+            changePasswordLink.classList.remove("text-blue-600");
+            addressBookLink.classList.remove("text-blue-600");
 
             // Function to reset menu colors
             const resetMenuColors = () => {
                 accountInfoLink.classList.remove("text-blue-600");
                 ordersLink.classList.remove("text-blue-600");
                 changePasswordLink.classList.remove("text-blue-600");
-                addressBookLink.classList.remove("text-blue-600");
-                accountInfoLink.classList.add("text-gray-600");
-                ordersLink.classList.add("text-gray-600");
-                changePasswordLink.classList.add("text-gray-600");
-                addressBookLink.classList.add("text-gray-600");
+            addressBookLink.classList.remove("text-blue-600");
             };
 
             // Function to hide all sections
@@ -204,6 +344,7 @@
                 accountInfo.classList.add("hidden");
                 orders.classList.add("hidden");
                 changePasswordForm.classList.add("hidden");
+                addressBook.classList.add("hidden");
             };
 
             // Handle "Thông tin tài khoản" link click
@@ -230,7 +371,48 @@
                 changePasswordForm.classList.remove("hidden");
             });
 
-            // Handle password change form submission
+            // Handle "Sổ địa chỉ" link click
+            addressBookLink.addEventListener("click", () => {
+                resetMenuColors();
+                addressBookLink.classList.add("text-blue-600");
+                hideAllSections();
+                addressBook.classList.remove("hidden");
+            });
+
+            // Handle "Thêm địa chỉ" button click
+            document.getElementById("add-address-btn").addEventListener("click", () => {
+                document.getElementById("address-form-container").classList.remove("hidden");
+                loadProvinces(); // Tải danh sách tỉnh/thành khi mở form
+            });
+
+            // Handle "Hủy" button click
+            document.getElementById("cancel-address-btn").addEventListener("click", () => {
+                document.getElementById("address-form-container").classList.add("hidden");
+                document.getElementById("add-address-form").reset(); // Reset form
+            });
+
+            // Gắn sự kiện mở dropdown cho các input
+            document.getElementById("province-input").addEventListener("click", () => {
+                toggleDropdown("province");
+            });
+
+            document.getElementById("district-input").addEventListener("click", () => {
+                if (!document.getElementById("province-input").value) {
+                    alert("Vui lòng chọn tỉnh/thành phố trước");
+                    return;
+                }
+                toggleDropdown("district");
+            });
+
+            document.getElementById("ward-input").addEventListener("click", () => {
+                if (!document.getElementById("district-input").value) {
+                    alert("Vui lòng chọn quận/huyện trước");
+                    return;
+                }
+                toggleDropdown("ward");
+            });
+
+            // Đổi mật khẩu
             document.getElementById("passwordForm").addEventListener("submit", async (event) => {
                 event.preventDefault();
 
@@ -305,10 +487,278 @@
                     alert("Đã xảy ra lỗi khi đổi mật khẩu! Vui lòng thử lại.");
                 }
             });
+
+            // Load addresses
+            async function loadAddresses() {
+                try {
+                    const addressResponse = await fetch("http://localhost:5000/addresses", {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    });
+            
+                    const addresses = await addressResponse.json();
+            
+                    if (addressResponse.ok) {
+                        const addressList = document.getElementById("address-list");
+                        addressList.innerHTML = ""; // Xóa dữ liệu cũ
+                        addresses.forEach(address => {
+                            const addressItem = document.createElement("div");
+                            addressItem.classList.add("border-b", "pb-2");
+                            addressItem.innerHTML = `
+                                <p class="text-gray-600">
+                                    <span class="font-semibold">Họ tên:</span> ${address.full_name}
+                                    ${address.is_default ? '<span class="text-green-600 text-sm ml-2">[Địa chỉ mặc định]</span>' : ''}
+                                </p>
+                                <p class="text-gray-600"><span class="font-semibold">Địa chỉ:</span> ${address.address}</p>
+                                <p class="text-gray-600"><span class="font-semibold">Số điện thoại:</span> ${address.phone}</p>
+                                <div class="flex space-x-2 mt-2">
+                                    <a href="#" class="text-blue-600 hover:underline">Chỉnh sửa địa chỉ</a>
+                                    <a href="#" class="text-red-600 hover:underline">Xóa</a>
+                                </div>
+                            `;
+                            addressList.appendChild(addressItem);
+                        });
+                    } else {
+                        console.error("Lỗi khi tải danh sách địa chỉ:", addresses.error);
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi tải danh sách địa chỉ:", error);
+                }
+            }
+
+            // Gọi hàm loadAddresses khi trang được tải
+            loadAddresses();
+
+            // Handle "Thêm địa chỉ" form submission
+            document.getElementById("add-address-form").addEventListener("submit", async (event) => {
+                event.preventDefault();
+            
+                const province = document.getElementById("province-input").value;
+                const district = document.getElementById("district-input").value;
+                const ward = document.getElementById("ward-input").value;
+                const isDefault = document.getElementById("is-default").checked;
+            
+                // Kiểm tra các trường bắt buộc
+                let isValid = true;
+                const requiredFields = [
+                    { id: "province-input", name: "Tỉnh/Thành phố" },
+                    { id: "district-input", name: "Quận/Huyện" },
+                    { id: "ward-input", name: "Phường/Xã" }
+                ];
+            
+                requiredFields.forEach(field => {
+                    const inputElement = document.getElementById(field.id);
+                    let errorElement = inputElement.nextElementSibling;
+            
+                    if (!errorElement || !errorElement.classList.contains("error-message")) {
+                        errorElement = document.createElement("p");
+                        errorElement.className = "error-message text-red-500 text-sm mt-1";
+                        inputElement.parentElement.insertAdjacentElement("afterend", errorElement);
+                    }
+            
+                    if (!inputElement.value.trim()) {
+                        inputElement.classList.add("input-error");
+                        errorElement.textContent = `${field.name} không được để trống`;
+                        isValid = false;
+                    } else {
+                        inputElement.classList.remove("input-error");
+                        errorElement.textContent = "";
+                    }
+                });
+            
+                if (!isValid) return;
+
+                // Tạo địa chỉ đầy đủ
+                const fullAddress = `${ward}, ${district}, ${province}`;
+
+                try {
+                    const response = await fetch("http://localhost:5000/addresses", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            full_name: userData.username || "Người dùng",
+                            address: fullAddress,
+                            phone: userData.phone || "",
+                            is_default: isDefault
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        alert("Thêm địa chỉ thành công!");
+                        document.getElementById("address-form-container").classList.add("hidden");
+                        document.getElementById("add-address-form").reset();
+                        loadAddresses(); // Tải lại danh sách địa chỉ
+                    } else {
+                        alert(result.error || "Lỗi khi thêm địa chỉ!");
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi thêm địa chỉ:", error);
+                    alert("Đã xảy ra lỗi khi thêm địa chỉ! Vui lòng thử lại.");
+                }
+            });
+
+            // Gợi ý địa chỉ
+            function toggleDropdown(type) {
+                const dropdown = document.getElementById(`${type}-dropdown`);
+                const arrow = document.querySelector(`#${type}-input + .arrow`);
+                dropdown.classList.toggle("show");
+                arrow.classList.toggle("rotate");
+            }
+
+            async function loadProvinces() {
+                try {
+                    let response = await fetch("https://provinces.open-api.vn/api/?depth=1");
+                    if (!response.ok) {
+                        throw new Error("Không thể tải danh sách tỉnh/thành");
+                    }
+                    let data = await response.json();
+                    console.log("Danh sách tỉnh/thành:", data); // Debug
+
+                    let provinceList = document.getElementById("province-list");
+                    provinceList.innerHTML = '<input type="text" id="province-search" class="w-full p-2 border-b focus:ring-0 focus:outline-none" placeholder="Tìm kiếm tỉnh/thành...">';
+
+                    data.forEach(province => {
+                        let li = document.createElement("li");
+                        li.textContent = removePrefix(province.name);
+                        li.dataset.fullName = province.name;
+                        li.onclick = async () => {
+                            selectOption("province", province.name);
+                            await loadDistricts(province.name);
+                        };
+                        provinceList.appendChild(li);
+                    });
+
+                    document.getElementById("province-search").addEventListener("input", function() {
+                        filterOptions(this.value, "province-list");
+                    });
+                } catch (error) {
+                    console.error("Lỗi khi tải danh sách tỉnh/thành:", error);
+                    alert("Không thể tải danh sách tỉnh/thành. Vui lòng kiểm tra kết nối mạng!");
+                }
+            }
+
+            async function loadDistricts(provinceName) {
+                try {
+                    let response = await fetch("https://provinces.open-api.vn/api/?depth=2");
+                    if (!response.ok) {
+                        throw new Error("Không thể tải danh sách quận/huyện");
+                    }
+                    let data = await response.json();
+                    console.log("Danh sách quận/huyện:", data); // Debug
+
+                    let province = data.find(p => p.name === provinceName);
+                    if (!province) return;
+
+                    let districtList = document.getElementById("district-list");
+                    districtList.innerHTML = '<input type="text" id="district-search" class="w-full p-2 border-b focus:ring-0 focus:outline-none" placeholder="Tìm kiếm quận/huyện...">';
+
+                    province.districts.forEach(district => {
+                        let li = document.createElement("li");
+                        li.textContent = district.name;
+                        li.onclick = async () => {
+                            selectOption("district", district.name);
+                            await loadWards(district.name);
+                        };
+                        districtList.appendChild(li);
+                    });
+
+                    document.getElementById("district-search").addEventListener("input", function() {
+                        filterOptions(this.value, "district-list");
+                    });
+
+                    document.getElementById("district-input").value = "";
+                    document.getElementById("ward-input").value = "";
+                    document.getElementById("ward-list").innerHTML = "";
+                } catch (error) {
+                    console.error("Lỗi khi tải danh sách quận/huyện:", error);
+                    alert("Không thể tải danh sách quận/huyện. Vui lòng kiểm tra kết nối mạng!");
+                }
+            }
+
+            async function loadWards(districtName) {
+                try {
+                    let response = await fetch("https://provinces.open-api.vn/api/?depth=3");
+                    if (!response.ok) {
+                        throw new Error("Không thể tải danh sách phường/xã");
+                    }
+                    let data = await response.json();
+                    console.log("Danh sách phường/xã:", data); // Debug
+
+                    let district = data.flatMap(p => p.districts).find(d => d.name === districtName);
+                    if (!district) return;
+
+                    let wardList = document.getElementById("ward-list");
+                    wardList.innerHTML = '<input type="text" id="ward-search" class="w-full p-2 border-b focus:ring-0 focus:outline-none" placeholder="Tìm kiếm phường/xã...">';
+
+                    district.wards.forEach(ward => {
+                        let li = document.createElement("li");
+                        li.textContent = ward.name;
+                        li.onclick = () => selectOption("ward", ward.name);
+                        wardList.appendChild(li);
+                    });
+
+                    document.getElementById("ward-search").addEventListener("input", function() {
+                        filterOptions(this.value, "ward-list");
+                    });
+
+                    document.getElementById("ward-input").value = "";
+                } catch (error) {
+                    console.error("Lỗi khi tải danh sách phường/xã:", error);
+                    alert("Không thể tải danh sách phường/xã. Vui lòng kiểm tra kết nối mạng!");
+                }
+            }
+
+            function selectOption(type, value) {
+                document.getElementById(`${type}-input`).value = value;
+                toggleDropdown(type);
+            }
+
+            function removePrefix(name) {
+                return name.replace(/^(Tỉnh|Thành phố)\s+/i, '');
+            }
+
+            function filterOptions(query, listId) {
+                let list = document.getElementById(listId);
+                let items = list.getElementsByTagName("li");
+
+                query = removeDiacritics(query).toLowerCase();
+
+                for (let item of items) {
+                    let text = removeDiacritics(item.textContent).toLowerCase();
+                    item.style.display = isMatching(text, query) ? "block" : "none";
+                }
+            }
+
+            function isMatching(text, query) {
+                if (!query) return true;
+
+                let words = text.split(" ");
+                let queryParts = query.split(" ");
+
+                for (let i = 0; i < queryParts.length; i++) {
+                    if (i >= words.length || !words[i].startsWith(queryParts[i])) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function removeDiacritics(str) {
+                return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            }
         });
     </script>
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92603f94789d4548',t:'MTc0MjkyNTAwMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92604e99cfbfbfe7',t:'MTc0MjkyNTYxOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92608a14efa54526',t:'MTc0MjkyODA1NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9268d1c03e30afb6',t:'MTc0MzAxNDg3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

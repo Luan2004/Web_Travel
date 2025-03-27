@@ -23,12 +23,31 @@ const db = new sqlite3.Database('./database.db', (err) => {
             username TEXT UNIQUE NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT,
+            address TEXT,
+            phone TEXT,
             googleId TEXT UNIQUE
         )`, (err) => {
             if (err) {
                 console.error("❌ Lỗi tạo bảng Users:", err.message);
             } else {
                 console.log("✅ Bảng Users đã sẵn sàng!");
+            }
+        });
+
+        // Tạo bảng Addresses nếu chưa có
+        db.run(`CREATE TABLE IF NOT EXISTS Addresses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            full_name TEXT NOT NULL,
+            address TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            is_default BOOLEAN DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES Users(id)
+        )`, (err) => {
+            if (err) {
+                console.error("❌ Lỗi tạo bảng Addresses:", err.message);
+            } else {
+                console.log("✅ Bảng Addresses đã sẵn sàng!");
             }
         });
 
@@ -79,6 +98,7 @@ app.get('/tour', (req, res) => {
     res.sendFile(path.join(__dirname, 'html', 'tour.html'));
 });
 
+//Thông tin tour
 app.get('/tours', (req, res) => {
     db.all("SELECT * FROM Tours", [], (err, rows) => {
         if (err) {
@@ -145,6 +165,7 @@ app.post('/google-auth', async(req, res) => {
 });
 
 // 🟢 API Đăng ký
+// 🟢 API Đăng ký
 app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
 
@@ -178,13 +199,14 @@ app.post('/register', (req, res) => {
                         console.error("❌ Lỗi chèn dữ liệu:", insertErr);
                         return res.status(500).json({ error: "Lỗi khi tạo tài khoản!" });
                     }
-                    res.status(201).json({ message: "Đăng ký thành công!" });
+                    // Tạo token sau khi đăng ký thành công
+                    const token = jwt.sign({ id: this.lastID, email }, 'secretkey', { expiresIn: '1h' });
+                    res.status(201).json({ message: "Đăng ký thành công!", token });
                 }
             );
         });
     });
 });
-
 
 // 🟢 API Đăng nhập
 app.post('/login', async(req, res) => {
@@ -288,6 +310,80 @@ app.post('/change-password', async (req, res) => {
                 res.status(200).json({ message: 'Đổi mật khẩu thành công!' });
             });
         });
+    } catch (err) {
+        console.error('❌ Lỗi xác thực token:', err);
+        res.status(403).json({ error: 'Token không hợp lệ hoặc hết hạn!' });
+    }
+});
+
+// API lấy danh sách địa chỉ
+app.get('/addresses', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({ error: 'Không có token!' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+        const userId = decoded.id;
+
+        db.all(`SELECT * FROM Addresses WHERE user_id = ?`, [userId], (err, addresses) => {
+            if (err) {
+                console.error('❌ Lỗi truy vấn địa chỉ:', err);
+                return res.status(500).json({ error: 'Lỗi truy vấn địa chỉ!' });
+            }
+            res.json(addresses || []); // Trả về mảng rỗng nếu không có địa chỉ
+        });
+    } catch (err) {
+        console.error('❌ Lỗi xác thực token:', err);
+        res.status(403).json({ error: 'Token không hợp lệ hoặc hết hạn!' });
+    }
+});
+
+// API thêm địa chỉ mới
+app.post('/addresses', async (req, res) => {
+    const authHeader = req.headers.authorization;
+    const token = authHeader && authHeader.split(' ')[1];
+    const { full_name, address, phone, is_default } = req.body;
+
+    // Kiểm tra token
+    if (!token) {
+        return res.status(401).json({ error: 'Không có token!' });
+    }
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!full_name || !address || !phone) {
+        return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ thông tin!' });
+    }
+
+    try {
+        // Xác thực token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
+        const userId = decoded.id;
+
+        // Nếu địa chỉ mới được đặt làm mặc định, bỏ trạng thái mặc định của các địa chỉ khác
+        if (is_default) {
+            db.run(`UPDATE Addresses SET is_default = 0 WHERE user_id = ?`, [userId], (err) => {
+                if (err) {
+                    console.error('❌ Lỗi cập nhật trạng thái mặc định:', err);
+                }
+            });
+        }
+
+        // Thêm địa chỉ mới vào database
+        db.run(
+            `INSERT INTO Addresses (user_id, full_name, address, phone, is_default) VALUES (?, ?, ?, ?, ?)`,
+            [userId, full_name, address, phone, is_default ? 1 : 0],
+            function (err) {
+                if (err) {
+                    console.error('❌ Lỗi khi thêm địa chỉ:', err);
+                    return res.status(500).json({ error: 'Lỗi khi thêm địa chỉ!' });
+                }
+                res.status(201).json({ message: 'Thêm địa chỉ thành công!', addressId: this.lastID });
+            }
+        );
     } catch (err) {
         console.error('❌ Lỗi xác thực token:', err);
         res.status(403).json({ error: 'Token không hợp lệ hoặc hết hạn!' });

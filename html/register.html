@@ -128,7 +128,7 @@
     <script>
         document.getElementById('registerForm').addEventListener('submit', async function(event) {
             event.preventDefault();
-
+        
             const username = document.getElementById('username').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
@@ -137,21 +137,21 @@
             const emailError = document.getElementById('emailError');
             const passwordError = document.getElementById('passwordError');
             const registerButton = document.getElementById('registerButton');
-
+        
             // Reset lỗi trước khi kiểm tra
             usernameError.classList.add('hidden');
             emailError.classList.add('hidden');
             passwordError.classList.add('hidden');
-
+        
             if (password !== confirmPassword) {
                 passwordError.classList.remove('hidden');
                 passwordError.textContent = "Mật khẩu không khớp!";
                 return;
             }
-
+        
             registerButton.disabled = true;
             registerButton.textContent = "Đang đăng ký...";
-
+        
             try {
                 const response = await fetch('http://localhost:5000/register', {
                     method: 'POST',
@@ -164,9 +164,9 @@
                         password
                     }),
                 });
-
+        
                 const data = await response.json();
-
+        
                 if (!response.ok) {
                     if (data.error === "Tên đăng nhập đã tồn tại") {
                         usernameError.classList.remove('hidden');
@@ -179,12 +179,12 @@
                     }
                     return;
                 }
-
-                // Đăng ký thành công
+        
+                // Lưu token và chuyển hướng về trang chủ
                 localStorage.setItem('token', data.token);
-                alert('Đăng ký thành công!');
-                window.location.href = 'home.html';
-
+                alert('Đăng ký thành công! Đang chuyển về trang chủ...');
+                window.location.href = 'home.html'; // Đảm bảo chuyển về home.html
+        
             } catch (error) {
                 alert("Lỗi kết nối đến server! Vui lòng thử lại.");
             } finally {
